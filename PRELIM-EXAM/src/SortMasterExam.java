@@ -6,13 +6,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
-import java.util.List; 
+import java.util.List;
 
 public class SortMasterExam extends JFrame {
 
     // ==========================================
-    // FIXED: Person class moved inside to prevent 
-    // a loose "Person.class" file from appearing.
+    // INNER CLASS: Person
     // ==========================================
     private static class Person {
         int id;
@@ -26,7 +25,7 @@ public class SortMasterExam extends JFrame {
         }
 
         @Override
-        public String toString() { 
+        public String toString() {
             return String.format("%d %s %s", id, firstName, lastName);
         }
     }
@@ -36,7 +35,7 @@ public class SortMasterExam extends JFrame {
     private final Color COL_PANEL     = new Color(40, 40, 45);
     private final Color COL_ACCENT    = new Color(50, 150, 255); // Nice Blue
     private final Color COL_BTN_MAIN  = new Color(60, 60, 65);
-    private final Color COL_HEADER    = new Color(50, 50, 55); 
+    private final Color COL_HEADER    = new Color(50, 50, 55);
     private final Color COL_TEXT      = new Color(240, 240, 240);
     private final Color COL_SUCCESS   = new Color(46, 204, 113); // Emerald
     private final Color COL_WARNING   = new Color(241, 196, 15); // Yellow
@@ -44,7 +43,7 @@ public class SortMasterExam extends JFrame {
     // --- DATA STATE ---
     private List<Person> masterData = new ArrayList<>();
     private Person[] workingData = null;
-    private File currentFile = new File("generated_data.csv");
+    private File currentFile = null;
 
     // --- COMPONENTS ---
     private JTextArea logArea;
@@ -56,14 +55,14 @@ public class SortMasterExam extends JFrame {
     private JButton btnPrevPage, btnNextPage, btnExportSlice;
     private JLabel lblPageInfo;
     private int currentPage = 1;
-    private double lastLoadSeconds = 0.0; 
+    private double lastLoadSeconds = 0.0;
 
     // Progress tracking
     private volatile int progressCounter = 0;
     private volatile int progressTotal = 1;
     private volatile int progressNextPct = 0;
 
-    private static final Dimension MIN_APP_SIZE = new Dimension(1100, 700); 
+    private static final Dimension MIN_APP_SIZE = new Dimension(1100, 700);
 
     public SortMasterExam() {
         setTitle("Design & Analysis of Algorithms: Prelim Exam Tool");
@@ -73,7 +72,7 @@ public class SortMasterExam extends JFrame {
         setLocationRelativeTo(null);
         getContentPane().setBackground(COL_BG);
         setLayout(new BorderLayout(15, 15));
-        
+
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -92,9 +91,11 @@ public class SortMasterExam extends JFrame {
         // Layout Structure
         add(createHeader(), BorderLayout.NORTH);
         add(createMainContent(), BorderLayout.CENTER);
-        add(createActionPanel(), BorderLayout.SOUTH); 
+        add(createActionPanel(), BorderLayout.SOUTH);
 
-        // Auto-scan for file
+        // ============================================================
+        // FIX: Run Smart Scan on startup to find the file automatically
+        // ============================================================
         smartFileScan("generated_data.csv");
     }
 
@@ -110,7 +111,7 @@ public class SortMasterExam extends JFrame {
         title.setForeground(COL_ACCENT);
         title.setPreferredSize(new Dimension(560, title.getPreferredSize().height));
         title.setMaximumSize(new Dimension(580, title.getPreferredSize().height));
-        
+
         JLabel subtitle = new JLabel("Prelim Exam • Data Structures & Algorithms");
         subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         subtitle.setForeground(Color.GRAY);
@@ -127,13 +128,25 @@ public class SortMasterExam extends JFrame {
         filePanel.setOpaque(false);
         filePanel.setBorder(new EmptyBorder(6, 6, 6, 6));
         filePanel.setMinimumSize(new Dimension(220, 40));
-        
+
         ActionButton btnGen = new ActionButton("Generate CSV", COL_BTN_MAIN);
         ActionButton btnLoad = new ActionButton("Load CSV", COL_BTN_MAIN);
-        
+
         btnGen.addActionListener(e -> generateDummyCSV());
         btnLoad.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
+            
+            // Smart directory start
+            File startDir = new File(".");
+            if (currentFile != null && currentFile.getParentFile() != null && currentFile.getParentFile().exists()) {
+                startDir = currentFile.getParentFile();
+            } else {
+                // Try to guess data folder
+                File dataDir = new File("data");
+                if (dataDir.exists()) startDir = dataDir;
+            }
+            fc.setCurrentDirectory(startDir);
+            
             fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSV files", "csv"));
             int res = fc.showOpenDialog(this);
             if (res == JFileChooser.APPROVE_OPTION) {
@@ -165,7 +178,7 @@ public class SortMasterExam extends JFrame {
         configBox.setLayout(new GridLayout(2, 2, 10, 10));
         configBox.setPreferredSize(new Dimension(0, 120));
         configBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 160));
-        
+
         configBox.add(createLabel("Rows to Sort (N):"));
         comboN = new JComboBox<>(new String[]{"1000", "10000", "50000", "100000"});
         comboN.setEditable(true);
@@ -181,7 +194,7 @@ public class SortMasterExam extends JFrame {
             });
         }
         configBox.add(comboN);
-        
+
         configBox.add(createLabel("Sort Column:"));
         comboSortBy = new JComboBox<>(new String[]{"ID", "FirstName", "LastName"});
         configBox.add(comboSortBy);
@@ -191,7 +204,7 @@ public class SortMasterExam extends JFrame {
         logBox.setLayout(new BorderLayout());
         logBox.setPreferredSize(new Dimension(0, 420));
         logBox.setMinimumSize(new Dimension(0, 300));
-        
+
         logArea = new JTextArea();
         logArea.setEditable(false);
         logArea.setFont(new Font("Consolas", Font.PLAIN, 12));
@@ -205,7 +218,7 @@ public class SortMasterExam extends JFrame {
         logSp.setOpaque(true); logSp.setBackground(new Color(35,35,40)); logSp.getViewport().setBackground(new Color(35,35,40));
         logSp.setBorder(null);
         JScrollBar lvsb = logSp.getVerticalScrollBar(); if (lvsb != null) { lvsb.setUI(new DarkScrollBarUI()); lvsb.setUnitIncrement(16); lvsb.setBackground(new Color(35,35,40)); lvsb.setOpaque(true); }
-        
+
         logBox.add(logSp, BorderLayout.CENTER);
 
         left.add(configBox, BorderLayout.NORTH);
@@ -228,8 +241,7 @@ public class SortMasterExam extends JFrame {
         previewTable.getTableHeader().setForeground(COL_TEXT);
         previewTable.getTableHeader().setOpaque(true);
         previewTable.getTableHeader().setBorder(new EmptyBorder(8, 8, 8, 8));
-        
-        // This line uses "Object.class" to target all cells, this does NOT create a file on disk.
+
         previewTable.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -271,13 +283,17 @@ public class SortMasterExam extends JFrame {
         lblPageInfo.setPreferredSize(new Dimension(120, 24));
         lblPageInfo.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // --- FULL EXPORT LOGIC RESTORED ---
         btnExportSlice = new JButton("Export CSV");
         btnExportSlice.addActionListener(ev -> {
             int n = getRequestedRowCount(); if (n == -1) return;
             final Person[] dataToExport = (workingData != null) ? workingData : getSlice(n);
+            
+            // Checkbox options
             JCheckBox chkHeader = new JCheckBox("Include header row (ID,FirstName,LastName)", true);
             JCheckBox chkRenumber = new JCheckBox("Renumber IDs starting at 1", false);
             JPanel opt = new JPanel(new GridLayout(0,1)); opt.add(chkHeader); opt.add(chkRenumber);
+            
             int ok = JOptionPane.showConfirmDialog(this, opt, "Export Options", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (ok != JOptionPane.OK_OPTION) return;
 
@@ -291,8 +307,10 @@ public class SortMasterExam extends JFrame {
             if (res != JFileChooser.APPROVE_OPTION) return;
             File out = fc.getSelectedFile();
             if (out.exists()) { int o = JOptionPane.showConfirmDialog(this, "File exists. Overwrite?", "Confirm", JOptionPane.YES_NO_OPTION); if (o != JOptionPane.YES_OPTION) return; }
+            
             final boolean includeHeader = chkHeader.isSelected();
             final boolean renumber = chkRenumber.isSelected();
+            
             new Thread(() -> {
                 try {
                     exportSlice(dataToExport, out, includeHeader, renumber);
@@ -346,7 +364,7 @@ public class SortMasterExam extends JFrame {
 
         right.add(topBar, BorderLayout.NORTH);
         JScrollPane sp = new JScrollPane(previewTable);
-        previewScrollPane = sp; 
+        previewScrollPane = sp;
         sp.setOpaque(true);
         sp.setBackground(new Color(40,40,45));
         sp.getViewport().setBackground(new Color(40,40,45));
@@ -384,8 +402,8 @@ public class SortMasterExam extends JFrame {
         centerButtons.setOpaque(false);
         btnBub = new ActionButton("Run Bubble Sort", COL_BTN_MAIN);
         btnIns = new ActionButton("Run Insertion Sort", COL_BTN_MAIN);
-        btnMrg = new ActionButton("Run Merge Sort", COL_ACCENT); 
-        btnAutoBench = new ActionButton("Auto Benchmark", new Color(39, 174, 96)); 
+        btnMrg = new ActionButton("Run Merge Sort", COL_ACCENT);
+        btnAutoBench = new ActionButton("Auto Benchmark", new Color(39, 174, 96));
         centerButtons.add(btnBub);
         centerButtons.add(btnIns);
         centerButtons.add(btnMrg);
@@ -426,8 +444,14 @@ public class SortMasterExam extends JFrame {
     // ================== LOGIC: BENCHMARK ==================
 
     private void runBenchmark(String type) {
+        // Prevent running if data isn't loaded
+        if (masterData.isEmpty()) { 
+            JOptionPane.showMessageDialog(this, "Data not loaded.\nPlease ensure 'generated_data.csv' is in the 'data' folder or use Load CSV."); 
+            return; 
+        }
+
         int requested = getRequestedRowCount(); if (requested == -1) return;
-        prepareSlice(); 
+        prepareSlice();
         if (workingData == null) return;
 
         int actual = workingData.length;
@@ -451,17 +475,11 @@ public class SortMasterExam extends JFrame {
                 toggleButtons(false);
             });
 
-            // ============================================================
-            // FIX: Initialize progress specifically for Merge Sort here
-            // because the recursive function cannot set it itself.
-            // ============================================================
             if (type.equals("Merge")) {
-                // Calculate n * log2(n) approximation for total merge operations
                 int logN = (int) Math.ceil(Math.log(Math.max(actual, 2)) / Math.log(2));
-                int totalWork = actual * (logN + 1); 
+                int totalWork = actual * (logN + 1);
                 startProgress(totalWork, "Sorting (Merge):");
             }
-            // ============================================================
 
             long start = System.nanoTime();
             if (type.equals("Bubble")) bubbleSort(workingData, comp);
@@ -643,20 +661,49 @@ public class SortMasterExam extends JFrame {
     }
     private void swap(Person[] arr, int i, int j) { Person t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
 
-    // ================== FILE HANDLING ==================
-    private void smartFileScan(String filename) {
-        File f = new File(filename);
-        if(!f.exists()) f = new File(System.getProperty("user.dir"), filename); 
-        if(f.exists()) { currentFile = f; loadData(); }
+    // ================== FILE HANDLING (FIXED & ROBUST) ==================
+
+    /**
+     * Tries to find the filename in the current directory, the 'data' subdirectory,
+     * or the '../data' relative directory.
+     */
+ private void smartFileScan(String filename) {
+        String[] potentialPaths = {
+            "PRELIM-EXAM/data/" + filename, // <--- THIS IS THE MISSING PATH
+            "data/" + filename,             // If running inside PRELIM-EXAM folder
+            "../data/" + filename,          // If running inside src folder
+            filename                        // If file is in the same folder
+        };
+
+        log("--- DEBUG: Auto-Scan Started ---");
+        // This prints where the program thinks it is running from
+        log("Working Directory: " + System.getProperty("user.dir"));
+
+        for (String path : potentialPaths) {
+            File f = new File(path);
+            log("Checking: " + f.getPath()); 
+            
+            if (f.exists() && !f.isDirectory()) {
+                log("SUCCESS: Found file at: " + path);
+                currentFile = f;
+                loadData();
+                return;
+            }
+        }
+
+        log("FAILED: Could not find '" + filename + "'.");
+        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, 
+            "Could not auto-locate 'generated_data.csv'.\n\n" +
+            "Please use the 'Load CSV' button to select it manually.",
+            "File Not Found", JOptionPane.WARNING_MESSAGE));
     }
-    
     private void loadData() {
         if (currentFile == null || !currentFile.exists()) {
             SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "No CSV file selected or file does not exist. Use Load CSV to pick a file."));
             return;
         }
         new Thread(() -> {
-            log("Loading data...");
+            log("Loading data from " + currentFile.getName() + "...");
             masterData.clear();
             long start = System.nanoTime();
             try (BufferedReader br = new BufferedReader(new FileReader(currentFile))) {
@@ -676,9 +723,6 @@ public class SortMasterExam extends JFrame {
                 lastLoadSeconds = sec;
                 SwingUtilities.invokeLater(() -> {
                     log(String.format("Loaded %d records in %.4f s.", masterData.size(), sec));
-                    int minId = Integer.MAX_VALUE, maxId = Integer.MIN_VALUE;
-                    for (Person p : masterData) { minId = Math.min(minId, p.id); maxId = Math.max(maxId, p.id); }
-
                     lblStatus.setText(String.format("Load: %.4f s", sec));
                     lblStatus.setForeground(COL_ACCENT);
                     currentPage = 1;
@@ -697,21 +741,24 @@ public class SortMasterExam extends JFrame {
                 int n = 100000;
                 try { n = Integer.parseInt(s.trim()); } catch (Exception ex) { SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Please enter a valid integer for rows.")); return; }
                 if (n <= 0) { SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Number of rows must be positive.")); return; }
-                if (n > 2_000_000) { int ok = JOptionPane.showConfirmDialog(this, "You requested a very large file ("+n+" rows). Continue?", "Large file", JOptionPane.YES_NO_OPTION); if (ok != JOptionPane.YES_OPTION) return; }
                 final int nFinal = n;
 
                 SwingUtilities.invokeLater(() -> log("Generating " + nFinal + " records..."));
                 String defaultName = "generated_data_" + nFinal + "_" + new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".csv";
+                
+                // Save to 'data' folder if possible
+                File defaultDir = new File("data");
+                if (!defaultDir.exists()) defaultDir = new File(".");
+                
                 JFileChooser fc = new JFileChooser();
                 fc.setDialogTitle("Save Generated CSV");
-                File defaultDir = (currentFile != null && currentFile.getParentFile() != null) ? currentFile.getParentFile() : new File(System.getProperty("user.dir"));
                 fc.setCurrentDirectory(defaultDir);
                 fc.setSelectedFile(new File(defaultDir, defaultName));
+                
                 int res = fc.showSaveDialog(this);
-                if (res != JFileChooser.APPROVE_OPTION) { SwingUtilities.invokeLater(() -> log("Generation cancelled by user.")); return; }
+                if (res != JFileChooser.APPROVE_OPTION) { SwingUtilities.invokeLater(() -> log("Generation cancelled.")); return; }
                 File outFile = fc.getSelectedFile();
-                if (outFile.exists()) { int opt = JOptionPane.showConfirmDialog(this, "File exists. Overwrite?", "Confirm", JOptionPane.YES_NO_OPTION); if (opt != JOptionPane.YES_OPTION) { log("Generation cancelled (would overwrite)."); return; } }
-
+                
                 try (FileWriter fw = new FileWriter(outFile)) {
                     fw.write("ID,FirstName,LastName\n");
                     String[] f = {"John","Jane","Alex","Chris","Katie","Mike"};
@@ -719,10 +766,10 @@ public class SortMasterExam extends JFrame {
                     Random r = new Random();
                     for (int i = 1; i <= nFinal; i++) fw.write(i + "," + f[r.nextInt(f.length)] + "," + l[r.nextInt(l.length)] + "\n");
                 }
-                SwingUtilities.invokeLater(() -> log("File generated successfully: " + outFile.getName()));
+                SwingUtilities.invokeLater(() -> log("File generated: " + outFile.getName()));
                 currentFile = outFile;
                 loadData();
-            } catch (Exception e) { SwingUtilities.invokeLater(() -> log("Error generating file: " + e.getMessage())); }
+            } catch (Exception e) { SwingUtilities.invokeLater(() -> log("Error generating: " + e.getMessage())); }
         }).start();
     }
 
@@ -783,11 +830,8 @@ public class SortMasterExam extends JFrame {
         }
         String[] cols = {"ID","First Name","Last Name"};
         tableModel.setDataVector(chunk, cols);
-        previewTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        previewTable.getTableHeader().setBackground(COL_HEADER);
-        previewTable.getTableHeader().setForeground(COL_TEXT);
-        previewTable.getTableHeader().setOpaque(true);
-        previewTable.getTableHeader().setBorder(new EmptyBorder(8, 8, 8, 8));
+        
+        // --- RESTORED TABLE RENDERER ---
         previewTable.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -802,23 +846,16 @@ public class SortMasterExam extends JFrame {
                 return c;
             }
         });
-        previewTable.getColumnModel().getColumn(0).setPreferredWidth(60);
-        previewTable.getColumnModel().getColumn(1).setPreferredWidth(150);
-        previewTable.getColumnModel().getColumn(2).setPreferredWidth(150);
-
+        
         lblPageInfo.setText(String.format("Page %d / %d", (pageCount == 0 ? 0 : currentPage), pageCount));
         btnPrevPage.setEnabled(currentPage > 1);
         btnNextPage.setEnabled(currentPage < pageCount);
 
-        int minRows = Math.max(1, Math.min(rows, 50));
-        int headerH = previewTable.getTableHeader().getPreferredSize().height;
-        int height = minRows * previewTable.getRowHeight() + headerH + 8;
-        Dimension pref = previewTable.getPreferredScrollableViewportSize();
-        previewTable.setPreferredScrollableViewportSize(new Dimension(Math.max(pref.width, 400), height));
         adjustTableColumns();
         previewTable.revalidate();
         SwingUtilities.invokeLater(() -> { previewTable.revalidate(); previewTable.repaint(); });
     }
+    
     private void adjustTableColumns() {
         if (previewScrollPane == null || previewTable == null) return;
         int w = previewScrollPane.getViewport().getWidth();
@@ -832,8 +869,7 @@ public class SortMasterExam extends JFrame {
             previewTable.getColumnModel().getColumn(0).setPreferredWidth(idCol);
             previewTable.getColumnModel().getColumn(1).setPreferredWidth(col1);
             previewTable.getColumnModel().getColumn(2).setPreferredWidth(col2);
-        } catch (Exception ex) {
-        }
+        } catch (Exception ex) {}
     }
 
     private void toggleButtons(boolean on) { btnBub.setEnabled(on); btnIns.setEnabled(on); btnMrg.setEnabled(on); }
@@ -898,6 +934,7 @@ public class SortMasterExam extends JFrame {
         }
     }
 
+    // --- FULL GRAPHICAL CHART RESTORED ---
     private void showBenchmarkChart(List<String> csvResults) {
         if (csvResults == null || csvResults.isEmpty()) return;
         List<String> labels = new ArrayList<>();
