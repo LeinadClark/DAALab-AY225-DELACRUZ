@@ -667,35 +667,47 @@ public class SortMasterExam extends JFrame {
      * Tries to find the filename in the current directory, the 'data' subdirectory,
      * or the '../data' relative directory.
      */
- private void smartFileScan(String filename) {
-        String[] potentialPaths = {
-            "PRELIM-EXAM/data/" + filename, // <--- THIS IS THE MISSING PATH
-            "data/" + filename,             // If running inside PRELIM-EXAM folder
-            "../data/" + filename,          // If running inside src folder
-            filename                        // If file is in the same folder
-        };
+private void smartFileScan(String filename) {
+        log("--- Deep Search Started ---");
+        
+        // Start searching from the place the program was launched
+        File currentDir = new File(System.getProperty("user.dir"));
+        File foundFile = null;
 
-        log("--- DEBUG: Auto-Scan Started ---");
-        // This prints where the program thinks it is running from
-        log("Working Directory: " + System.getProperty("user.dir"));
+        // Search UP to 4 levels of parent directories
+        for (int i = 0; i < 4; i++) {
+            if (currentDir == null) break;
 
-        for (String path : potentialPaths) {
-            File f = new File(path);
-            log("Checking: " + f.getPath()); 
+            log("Scanning: " + currentDir.getAbsolutePath());
+
+            // 1. Check if file is directly in this folder
+            File tryDirect = new File(currentDir, filename);
+            if (tryDirect.exists()) { foundFile = tryDirect; break; }
+
+            // 2. Check if file is in a "data" subfolder here
+            File tryData = new File(currentDir, "data/" + filename);
+            if (tryData.exists()) { foundFile = tryData; break; }
             
-            if (f.exists() && !f.isDirectory()) {
-                log("SUCCESS: Found file at: " + path);
-                currentFile = f;
-                loadData();
-                return;
-            }
+            // 3. Check specific "PRELIM-EXAM/data" path
+            File tryPrelim = new File(currentDir, "PRELIM-EXAM/data/" + filename);
+            if (tryPrelim.exists()) { foundFile = tryPrelim; break; }
+
+            // Move up one directory level
+            currentDir = currentDir.getParentFile();
         }
 
-        log("FAILED: Could not find '" + filename + "'.");
-        SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, 
-            "Could not auto-locate 'generated_data.csv'.\n\n" +
-            "Please use the 'Load CSV' button to select it manually.",
-            "File Not Found", JOptionPane.WARNING_MESSAGE));
+        if (foundFile != null) {
+            log("SUCCESS: Found file at: " + foundFile.getAbsolutePath());
+            currentFile = foundFile;
+            loadData();
+        } else {
+            log("FAILED: Could not find '" + filename + "' nearby.");
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, 
+                "Could not auto-locate '" + filename + "'.\n" +
+                "The app searched 4 levels of folders but couldn't find it.\n" +
+                "Please make sure you downloaded the 'data' folder.",
+                "File Not Found", JOptionPane.WARNING_MESSAGE));
+        }
     }
     private void loadData() {
         if (currentFile == null || !currentFile.exists()) {
