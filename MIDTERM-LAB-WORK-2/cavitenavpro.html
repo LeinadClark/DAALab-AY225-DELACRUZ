@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CaviteNav Pro</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --app-gradient: linear-gradient(43deg, #0A84FF 0%, #C850C0 46%, #FFCC70 100%);
+    --bg-color: #f5f5f7; --text: #1d1d1f; --dim: #515154; --muted: #86868b;
+    --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(0, 0, 0, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05); --input-bg: rgba(0, 0, 0, 0.05);
+    --grid-line: rgba(0, 0, 0, 0.05);
+  }
+
+  [data-theme="dark"] {
+    --bg-color: #000000; --text: #f5f5f7; --dim: rgba(255, 255, 255, 0.8); --muted: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(30, 30, 30, 0.6); --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); --input-bg: rgba(255, 255, 255, 0.1);
+    --grid-line: rgba(255, 255, 255, 0.05);
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg-color); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh; padding: 0; transition: background-color 0.4s ease, color 0.4s ease;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  body.loading { overflow: hidden; }
+
+  #capture-area {
+    padding: 32px 16px;
+    background-color: var(--bg-color);
+    min-height: 100vh;
+  }
+
+  /* Animations */
+  @keyframes floatBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+  @keyframes spinSmooth { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  @keyframes dash { to { stroke-dashoffset: -20; } }
+  @keyframes pulseRing { 0% { stroke-opacity: 0.1; stroke-width: 1; } 50% { stroke-opacity: 0.6; stroke-width: 3; } 100% { stroke-opacity: 0.1; stroke-width: 1; } }
+  @keyframes nodePop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+
+  /* Preloader */
+  #preloader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--app-gradient); background-size: 200% auto; animation: gradientFlow 4s ease infinite; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; transition: opacity 0.8s, visibility 0.8s; }
+  .loader-icon { font-size: 64px; margin-bottom: 24px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2)); animation: floatBounce 2s ease-in-out infinite; }
+  .loader-text { font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+  .loader-text i { font-size: 18px; animation: spinSmooth 1.5s linear infinite; }
+
+  /* Utilities */
+  .text-gradient { background: var(--app-gradient); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent; display: inline-block; animation: gradientFlow 6s ease infinite; }
+  .grad-bg { background: var(--app-gradient); }
+
+  /* Header */
+  .header-wrap { display: flex; justify-content: space-between; align-items: center; max-width: 960px; margin: 0 auto 24px auto; opacity: 0; }
+  body.app-loaded .header-wrap { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  h1 { font-size: clamp(20px, 4vw, 32px); font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  h1 i { color: #0A84FF; margin-right: 8px; }
+  .subtitle { font-size: 12px; font-weight: 600; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; margin: 0; }
+  
+  .header-actions { display: flex; gap: 10px; transition: opacity 0.2s; }
+  .icon-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text); width: 40px; height: 40px; border-radius: 50%; font-size: 16px; cursor: pointer; backdrop-filter: blur(16px); transition: all 0.3s ease; box-shadow: var(--glass-shadow); display: flex; align-items: center; justify-content: center; }
+  .icon-btn:hover { transform: scale(1.1); background: var(--text); color: var(--bg-color); }
+
+  /* Panels */
+  .wrap { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  .glass-panel { background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: var(--glass-shadow); transition: background 0.4s, border 0.4s; opacity: 0; transform: translateY(30px); }
+  body.app-loaded .glass-panel { animation: slideUpFade 0.6s forwards; }
+  
+  .controls { padding: 20px; display: flex; flex-wrap: wrap; gap: 16px; animation-delay: 0.1s; }
+  .ctrl-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
+  .ctrl-label { font-size: 11px; font-weight: 600; color: var(--dim); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+  select { background: var(--input-bg); border: 1px solid var(--glass-border); color: var(--text); padding: 10px 14px; border-radius: 12px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; -webkit-appearance: none; transition: all 0.3s; }
+  select option { background: var(--bg-color); color: var(--text); } 
+  select:focus { outline: none; border-color: #0A84FF; box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.15); }
+  select:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  button#findBtn { align-self: flex-end; background: var(--text); color: var(--bg-color); border: none; padding: 12px 24px; border-radius: 14px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1); }
+  button#findBtn:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+  button#findBtn:active { transform: scale(0.95); }
+
+  /* Map */
+  .main { display: flex; gap: 20px; flex-wrap: wrap; }
+  .map-panel { flex: 2; min-width: 280px; padding: 20px; animation-delay: 0.2s; position: relative; overflow: hidden; }
+  .side-panel { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 20px; animation-delay: 0.3s; }
+  .panel-label { font-size: 12px; font-weight: 600; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; margin: 0; }
+  
+  .map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; position: relative; z-index: 10; transition: opacity 0.2s; }
+  .map-controls { display: flex; gap: 6px; }
+  .map-controls button { background: var(--input-bg); border: 1px solid var(--glass-border); color: var(--text); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+  .map-controls button:hover { background: var(--text); color: var(--bg-color); }
+  
+  /* Draggable SVG Map */
+  svg#graph { display: block; width: 100%; height: 360px; transition: opacity 0.5s; cursor: grab; border-radius: 12px; background: rgba(0,0,0,0.02); }
+  svg#graph:active { cursor: grabbing; }
+  #map-layer { transform-origin: center center; }
+  
+  .grid-line { stroke: var(--grid-line); stroke-width: 1; }
+  .edge { stroke: url(#svg-gradient); opacity: 0.25; stroke-width: 1.5; transition: all 0.3s ease; }
+  .edge-arrow { fill: url(#svg-gradient); opacity: 0.25; transition: all 0.3s ease; }
+  .edge.path { opacity: 1; stroke-width: 3; stroke-dasharray: 6 4; animation: dash 1s linear infinite; }
+  .edge-arrow.path { opacity: 1; }
+  
+  /* Nodes */
+  .node { cursor: grab; }
+  .node:active { cursor: grabbing; }
+  .node-circle { fill: var(--bg-color); stroke: url(#svg-gradient); stroke-width: 2; transition: fill 0.3s, stroke 0.3s; transform-origin: center; transform-box: fill-box; }
+  .node-label { fill: var(--text); font-family: inherit; font-size: 9px; font-weight: 600; transition: fill 0.3s; pointer-events: none; }
+  .node-sub { fill: var(--muted); pointer-events: none; }
+  .node-ring { fill: none; stroke: url(#svg-gradient); stroke-width: 1; stroke-opacity: 0; pointer-events: none; }
+
+  .node.is-start .node-circle { stroke: #0A84FF; stroke-width: 3; }
+  .node.is-start .node-label { fill: #0A84FF; }
+  .node.is-end .node-circle { stroke: #FF2D55; stroke-width: 3; }
+  .node.is-end .node-label { fill: #FF2D55; }
+  .node.active .node-circle { fill: url(#svg-gradient); stroke: transparent; transform: scale(1.1); }
+  .node.active .node-label { fill: var(--bg-color); }
+  .node.active .node-sub { fill: var(--bg-color); }
+  .node.active .node-ring { animation: pulseRing 1.5s infinite; }
+  .node.pop .node-circle { animation: nodePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+  .card { padding: 20px; opacity: 0; }
+  body.app-loaded .card { animation: slideUpFade 0.6s forwards; }
+  .legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; font-weight: 500; color: var(--text); }
+  .legend-line { width: 20px; height: 3px; border-radius: 2px; }
+
+  /* Results */
+  #result-content .placeholder { color: var(--muted); font-size: 13px; font-weight: 500; text-align: center; padding: 20px 0; line-height: 1.5; }
+  #result-content .placeholder i { font-size: 28px; margin-bottom: 12px; display: block; opacity: 0.5; transition: transform 0.3s; }
+  #result-content .error { color: #FF2D55; font-size: 13px; font-weight: 500; padding: 10px 0; }
+
+  .path-nodes { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 16px; }
+  .path-node { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 8px; background: var(--input-bg); border: 1px solid var(--glass-border); color: var(--text); transition: all 0.4s; }
+  .path-node.active { background: var(--app-gradient); background-size: 200% auto; animation: gradientFlow 3s ease infinite; color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(10, 132, 255, 0.25); }
+  .path-arrow { color: var(--dim); font-size: 10px; }
+
+  .stat-box { margin-bottom: 10px; padding: 12px; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 10px; }
+  .stat-label { font-size: 10px; font-weight: 600; color: var(--dim); letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+  .stat-value { font-size: 20px; font-weight: 700; color: var(--text); }
+  .step-list { margin-top: 14px; }
+  .step-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--text); margin-bottom: 6px; font-weight: 500; padding: 4px; border-radius: 6px; }
+  .step-right { color: var(--dim); font-variant-numeric: tabular-nums; }
+
+  /* Table */
+  .table-wrap { padding: 20px; overflow-x: auto; animation-delay: 0.4s; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-size: 12px; }
+  th { text-align: left; color: var(--dim); font-weight: 600; padding: 8px 12px; border-bottom: 1px solid var(--glass-border); font-size: 10px; letter-spacing: 1px; }
+  td { padding: 10px 12px; border-top: 1px solid transparent; border-bottom: 1px solid transparent; transition: all 0.3s; }
+  td:first-child { border-left: 1px solid transparent; border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+  td:last-child { border-right: 1px solid transparent; border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+  td .cell-text { color: var(--text); display: inline-block; font-variant-numeric: tabular-nums; }
+  
+  tbody tr { transition: transform 0.2s, background-color 0.2s; cursor: default; }
+  tbody tr:not(.path-row):hover { background-color: var(--input-bg); }
+
+  tr.path-row { position: relative; z-index: 2; transform: scale(1.01); }
+  tr.path-row td { background: rgba(10, 132, 255, 0.08); border-top: 1px solid rgba(10, 132, 255, 0.4); border-bottom: 1px solid rgba(10, 132, 255, 0.4); }
+  tr.path-row td:first-child { border-left: 1px solid rgba(10, 132, 255, 0.4); }
+  tr.path-row td:last-child { border-right: 1px solid rgba(10, 132, 255, 0.4); }
+  td.hl .cell-text { font-weight: 700; background: var(--app-gradient); background-size: 200% auto; animation: gradientFlow 6s ease infinite; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; padding: 3px 8px; border-radius: 6px; box-shadow: 0 4px 10px rgba(10, 132, 255, 0.3); }
+
+  .hint { font-size: 11px; font-weight: 500; color: var(--muted); text-align: center; margin-top: 12px; letter-spacing: 0.5px; transition: opacity 0.2s;}
+
+  footer { text-align: center; font-size: 12px; font-weight: 500; color: var(--muted); padding: 10px 0; letter-spacing: 0.5px; opacity: 0; }
+  body.app-loaded footer { animation: slideUpFade 0.6s forwards; animation-delay: 0.5s; }
+
+  /* --- BUG FIX: EXPORT SNAPSHOT MODE --- 
+     These styles are temporarily applied *only* during the PNG capture. */
+  body.export-mode .glass-panel { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background-color: #ffffff !important; box-shadow: none !important; }
+  [data-theme="dark"] body.export-mode .glass-panel { background-color: #1e1e1e !important; }
+
+  body.export-mode .text-gradient { background: none !important; -webkit-text-fill-color: #0A84FF !important; color: #0A84FF !important; animation: none !important; }
+  body.export-mode td.hl .cell-text { background: #0A84FF !important; color: white !important; -webkit-text-fill-color: white !important; animation: none !important; box-shadow: none !important; }
+  body.export-mode .legend-line.grad-bg { background: #0A84FF !important; }
+  body.export-mode .path-node.active { background: #0A84FF !important; color: white !important; border-color: #0A84FF !important; animation: none !important; }
+  
+  /* Fix SVG missing issues by explicitly forcing stroke and disabling SVG animations */
+  body.export-mode .edge { stroke: #cccccc !important; opacity: 1 !important; }
+  body.export-mode .edge-arrow { fill: #cccccc !important; opacity: 1 !important; }
+  body.export-mode .edge.path { stroke: #0A84FF !important; stroke-width: 3px !important; stroke-dasharray: none !important; animation: none !important; opacity: 1 !important; }
+  body.export-mode .edge-arrow.path { fill: #0A84FF !important; animation: none !important; opacity: 1 !important; }
+  body.export-mode .node-circle { stroke: #888888 !important; }
+  body.export-mode .node.active .node-circle { fill: #0A84FF !important; stroke: none !important; animation: none !important; }
+  body.export-mode .node-ring { stroke: none !important; animation: none !important; display: none !important; }
+</style>
+</head>
+<body class="loading">
+
+<div id="preloader">
+  <i class="fa-solid fa-location-dot loader-icon"></i>
+  <div class="loader-text"><i class="fa-solid fa-circle-notch"></i> Loading CaviteNav Pro...</div>
+</div>
+
+<div id="capture-area">
+  
+  <div class="header-wrap">
+    <div>
+      <h1><i class="fa-solid fa-map-location-dot"></i> <span class="text-gradient">CaviteNav Pro</span></h1>
+      <div class="subtitle">Smart Route Optimizer</div>
+    </div>
+    <div class="header-actions" id="ui-actions">
+      <button id="exportBtn" class="icon-btn" title="Download Route as PNG"><i class="fa-solid fa-download"></i></button>
+      <button id="themeToggle" class="icon-btn" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="controls glass-panel">
+      <div class="ctrl-group">
+        <div class="ctrl-label"><i class="fa-solid fa-code-branch"></i> Routing Type</div>
+        <select id="routeType">
+          <option value="shortest">A to B (Shortest Path)</option>
+          <option value="tsp">Visit All (TSP Tour)</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl-label"><i class="fa-solid fa-location-dot"></i> Start Node</div>
+        <select id="startNode"></select>
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl-label"><i class="fa-solid fa-flag-checkered"></i> End Node</div>
+        <select id="endNode"></select>
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl-label"><i class="fa-solid fa-sliders"></i> Optimize By</div>
+        <select id="metric">
+          <option value="distance">Distance (km)</option>
+          <option value="time">Time (mins)</option>
+          <option value="fuel">Fuel (Liters)</option>
+        </select>
+      </div>
+      <div class="ctrl-group" style="justify-content:flex-end; flex: 0.5;">
+        <button id="findBtn"><i class="fa-solid fa-route"></i> Find</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="map-panel glass-panel">
+        <div class="map-header">
+          <div class="panel-label" style="margin:0;"><i class="fa-solid fa-network-wired"></i> Network Map</div>
+          <div class="map-controls" id="map-zoom-ui">
+            <button id="zoomOut" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+            <button id="zoomReset" title="Reset View"><i class="fa-solid fa-compress"></i></button>
+            <button id="zoomIn" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </div>
+        <svg id="graph" viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="svg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0A84FF" />
+              <stop offset="46%" stop-color="#C850C0" />
+              <stop offset="100%" stop-color="#FFCC70" />
+            </linearGradient>
+          </defs>
+          <g id="map-layer"></g> 
+        </svg>
+        <div class="hint" id="map-hint">
+          <i class="fa-solid fa-hand-pointer"></i> Drag Map to Pan / Drag Nodes to Move / Scroll to Zoom
+        </div>
+      </div>
+      
+      <div class="side-panel">
+        <div class="card glass-panel" style="animation-delay: 0.3s;">
+          <div class="panel-label"><i class="fa-solid fa-list-ul"></i> Legend</div>
+          <div class="legend-item"><div class="legend-line grad-bg"></div> Optimal Path</div>
+          <div class="legend-item"><div class="legend-line" style="background:#0A84FF;"></div> Start Node</div>
+          <div class="legend-item"><div class="legend-line" style="background:#FF2D55;"></div> End Node</div>
+          <div class="legend-item"><div class="legend-line grad-bg" style="opacity:0.25;"></div> Unvisited Edge</div>
+        </div>
+        <div class="card glass-panel" style="flex:1; animation-delay: 0.35s;">
+          <div class="panel-label"><i class="fa-solid fa-bolt"></i> Route Result</div>
+          <div id="result-content">
+            <div class="placeholder"><i class="fa-solid fa-map"></i>Select routing type<br>and click Find</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap glass-panel">
+      <div class="panel-label"><i class="fa-solid fa-table"></i> Edge Data Table</div>
+      <table id="edgeTable">
+        <thead><tr><th>FROM</th><th>TO</th><th>DISTANCE (km)</th><th>TIME (mins)</th><th>FUEL (L)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>&copy; Copyright Leinad Clark Dela Cruz 2026</footer>
+
+</div> <script>
+// --- Audio System ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playTone(freq, type, duration, vol) {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+  osc.start(); osc.stop(audioCtx.currentTime + duration);
+}
+const sfx = {
+  tick: () => playTone(600, 'sine', 0.1, 0.05),
+  pop: () => playTone(400, 'triangle', 0.15, 0.1),
+  success: () => { playTone(523.25, 'sine', 0.1, 0.1); setTimeout(()=>playTone(659.25, 'sine', 0.2, 0.1), 100); },
+  error: () => { playTone(200, 'sawtooth', 0.2, 0.1); setTimeout(()=>playTone(150, 'sawtooth', 0.3, 0.1), 150); }
+};
+
+// --- Preloader Logic ---
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.getElementById('preloader');
+    loader.style.opacity = '0'; loader.style.visibility = 'hidden';
+    document.body.classList.remove('loading');
+    document.body.classList.add('app-loaded');
+    setTimeout(() => loader.remove(), 800);
+  }, 1000);
+});
+
+// --- PNG Export Logic ---
+document.getElementById('exportBtn').addEventListener('click', () => { 
+  sfx.pop();
+  const exportBtn = document.getElementById('exportBtn');
+  const originalHtml = exportBtn.innerHTML;
+  
+  // Show spinner
+  exportBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+  // BUG FIX: Instantly finish animating the path before capturing so it's fully visible
+  if (currentPath && currentPath.length > 0) {
+    if(animInterval) clearInterval(animInterval);
+    currentPath.forEach(n => {
+      if(nodeEls[n]) {
+        nodeEls[n].g.classList.remove('is-start', 'is-end');
+        nodeEls[n].g.classList.add('active');
+      }
+      const el = document.getElementById('pn-'+n);
+      if(el) el.classList.add('active');
+    });
+  }
+
+  // BUG FIX: Reset Map transform so html2canvas doesn't mistakenly cut off the graph if panned
+  zoomScale = 1; 
+  panX = 0; 
+  panY = 0; 
+  updateMapTransform();
+  
+  // Hide UI elements we don't want in the screenshot
+  const uiActions = document.getElementById('ui-actions');
+  const mapZoomUi = document.getElementById('map-zoom-ui');
+  const mapHint = document.getElementById('map-hint');
+  
+  uiActions.style.display = 'none';
+  mapZoomUi.style.display = 'none';
+  mapHint.style.display = 'none';
+
+  // Fix html2canvas bugs by enabling a flat export mode
+  document.body.classList.add('export-mode');
+  
+  // Scroll to top to prevent cutoff
+  window.scrollTo(0, 0);
+
+  // Give the browser a split second to apply the new CSS
+  setTimeout(() => {
+    const captureArea = document.getElementById('capture-area');
+
+    html2canvas(captureArea, {
+      backgroundColor: getComputedStyle(document.body).backgroundColor,
+      scale: 2, 
+      logging: false,
+      useCORS: true,
+      scrollY: -window.scrollY 
+    }).then(canvas => {
+      // Restore UI
+      document.body.classList.remove('export-mode');
+      uiActions.style.display = 'flex';
+      mapZoomUi.style.display = 'flex';
+      mapHint.style.display = 'block';
+      exportBtn.innerHTML = originalHtml;
+
+      // Trigger Download
+      const link = document.createElement('a');
+      link.download = 'CaviteNav-Route.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      sfx.success();
+    }).catch(err => {
+      console.error("Export failed:", err);
+      document.body.classList.remove('export-mode');
+      uiActions.style.display = 'flex';
+      mapZoomUi.style.display = 'flex';
+      mapHint.style.display = 'block';
+      exportBtn.innerHTML = originalHtml;
+      sfx.error();
+    });
+  }, 100); 
+});
+
+const themeBtn = document.getElementById('themeToggle');
+themeBtn.addEventListener('click', () => {
+  sfx.pop();
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  themeBtn.innerHTML = next === 'light' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+});
+
+document.querySelectorAll('select').forEach(sel => {
+  sel.addEventListener('change', sfx.tick);
+});
+
+const EDGES = [
+  {from:"IMUS",to:"BACOOR",distance:10,time:15,fuel:1.2},
+  {from:"BACOOR",to:"DASMA",distance:12,time:25,fuel:1.5},
+  {from:"DASMA",to:"KAWIT",distance:12,time:25,fuel:1.5},
+  {from:"KAWIT",to:"INDANG",distance:12,time:25,fuel:1.2},
+  {from:"INDANG",to:"SILANG",distance:14,time:25,fuel:1.5},
+  {from:"SILANG",to:"GENTRI",distance:10,time:25,fuel:1.3},
+  {from:"GENTRI",to:"NOVELETA",distance:10,time:25,fuel:1.5},
+  {from:"NOVELETA",to:"IMUS",distance:10,time:15,fuel:1.2},
+  {from:"BACOOR",to:"SILANG",distance:10,time:25,fuel:1.3},
+  {from:"DASMA",to:"SILANG",distance:12,time:25,fuel:1.5},
+  {from:"SILANG",to:"BACOOR",distance:10,time:25,fuel:1.3},
+  {from:"NOVELETA",to:"BACOOR",distance:10,time:15,fuel:1.2},
+  {from:"SILANG",to:"KAWIT",distance:14,time:25,fuel:1.2},
+  {from:"IMUS",to:"NOVELETA",distance:10,time:15,fuel:1.2},
+];
+
+const FULL_EDGES = [...EDGES];
+EDGES.forEach(e => FULL_EDGES.push({from:e.to, to:e.from, distance:e.distance, time:e.time, fuel:e.fuel}));
+
+const NODE_POS = {
+  IMUS:     {x:200,y:100},
+  BACOOR:   {x:350,y:80},
+  NOVELETA: {x:110,y:180},
+  DASMA:    {x:460,y:140},
+  KAWIT:    {x:320,y:220},
+  GENTRI:   {x:75, y:280},
+  SILANG:   {x:460,y:270},
+  INDANG:   {x:400,y:330},
+};
+
+const NODES = Object.keys(NODE_POS);
+let currentPath = [];
+let animInterval = null;
+
+const startSel = document.getElementById('startNode');
+const endSel = document.getElementById('endNode');
+const routeTypeSel = document.getElementById('routeType');
+
+NODES.forEach(n => {
+  startSel.innerHTML += `<option value="${n}">${n}</option>`;
+  endSel.innerHTML += `<option value="${n}">${n}</option>`;
+});
+endSel.value = 'SILANG';
+
+routeTypeSel.addEventListener('change', (e) => {
+  endSel.disabled = e.target.value === 'tsp';
+});
+
+const tbody = document.querySelector('#edgeTable tbody');
+EDGES.forEach((e,i) => {
+  tbody.innerHTML += `<tr id="erow-${i}">
+    <td><span class="cell-text">${e.from}</span></td>
+    <td><span class="cell-text">${e.to}</span></td>
+    <td><span class="cell-text">${e.distance}</span></td>
+    <td><span class="cell-text">${e.time}</span></td>
+    <td><span class="cell-text">${e.fuel}</span></td>
+  </tr>`;
+});
+
+const svg = document.getElementById('graph');
+const mapLayer = document.getElementById('map-layer');
+const NS = 'http://www.w3.org/2000/svg';
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+for (let v of [100,200,300,400,500]) {
+  mapLayer.appendChild(svgEl('line',{x1:v,y1:10,x2:v,y2:350,class:'grid-line'}));
+  mapLayer.appendChild(svgEl('line',{x1:10,y1:v,x2:550,y2:v,class:'grid-line'}));
+}
+
+const edgeEls = [];
+EDGES.forEach((e, i) => {
+  const line = svgEl('line',{ class:'edge' });
+  const arrow = svgEl('polygon',{ class: 'edge-arrow' });
+  mapLayer.appendChild(line);
+  mapLayer.appendChild(arrow);
+  edgeEls.push({line, arrow, edge:e, idx:i});
+});
+
+const nodeEls = {};
+NODES.forEach(n => {
+  const {x,y} = NODE_POS[n];
+  const g = svgEl('g',{class: 'node'});
+  const outerRing = svgEl('circle',{r:24, class:'node-ring'});
+  const circle = svgEl('circle',{r:18, class:'node-circle'});
+  const label = svgEl('text',{y:-4,'text-anchor':'middle', class:'node-label'});
+  label.textContent = n;
+  const sub = svgEl('circle',{y:6,r:2, class:'node-sub'});
+
+  g.appendChild(outerRing); g.appendChild(circle);
+  g.appendChild(label); g.appendChild(sub);
+  mapLayer.appendChild(g);
+  nodeEls[n] = {g, circle, label, outerRing, sub};
+});
+
+function updateGraphLayout() {
+  edgeEls.forEach(el => {
+    const f = NODE_POS[el.edge.from], t = NODE_POS[el.edge.to];
+    const dx = t.x-f.x, dy = t.y-f.y;
+    const len = Math.sqrt(dx*dx+dy*dy);
+    if(len === 0) return;
+    const ux = dx/len, uy = dy/len;
+    const ax = t.x - ux*16, ay = t.y - uy*16; 
+    const px = -uy*4, py = ux*4;
+
+    el.line.setAttribute('x1', f.x); el.line.setAttribute('y1', f.y);
+    el.line.setAttribute('x2', t.x); el.line.setAttribute('y2', t.y);
+    el.arrow.setAttribute('points', `${ax},${ay} ${ax-ux*8+px},${ay-uy*8+py} ${ax-ux*8-px},${ay-uy*8-py}`);
+  });
+
+  NODES.forEach(n => {
+    nodeEls[n].g.setAttribute('transform', `translate(${NODE_POS[n].x}, ${NODE_POS[n].y})`);
+  });
+}
+updateGraphLayout();
+
+let zoomScale = 1, panX = 0, panY = 0;
+let isDraggingMap = false, isDraggingNode = null;
+let startX, startY;
+
+function updateMapTransform() {
+  mapLayer.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+}
+
+document.getElementById('zoomIn').addEventListener('click', () => { sfx.tick(); zoomScale *= 1.2; updateMapTransform(); });
+document.getElementById('zoomOut').addEventListener('click', () => { sfx.tick(); zoomScale /= 1.2; updateMapTransform(); });
+document.getElementById('zoomReset').addEventListener('click', () => { sfx.tick(); zoomScale = 1; panX = 0; panY = 0; updateMapTransform(); });
+
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  zoomScale *= e.deltaY > 0 ? 0.9 : 1.1;
+  updateMapTransform();
+}, {passive: false});
+
+NODES.forEach(n => {
+  nodeEls[n].g.addEventListener('mousedown', e => {
+    e.stopPropagation(); 
+    isDraggingNode = n;
+    sfx.pop();
+  });
+});
+
+svg.addEventListener('mousedown', e => {
+  if(isDraggingNode) return;
+  isDraggingMap = true;
+  startX = e.clientX - panX; startY = e.clientY - panY;
+});
+
+window.addEventListener('mousemove', e => {
+  if(isDraggingNode) {
+    const rect = svg.getBoundingClientRect();
+    const mapX = (e.clientX - rect.left - panX) / zoomScale;
+    const mapY = (e.clientY - rect.top - panY) / zoomScale;
+    NODE_POS[isDraggingNode].x = mapX;
+    NODE_POS[isDraggingNode].y = mapY;
+    updateGraphLayout();
+  } else if(isDraggingMap) {
+    panX = e.clientX - startX; panY = e.clientY - startY;
+    updateMapTransform();
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  if(isDraggingNode) sfx.pop();
+  isDraggingMap = false; isDraggingNode = null;
+});
+
+function resetGraphVisuals() {
+  edgeEls.forEach(({line, arrow}) => { line.classList.remove('path'); arrow.classList.remove('path'); });
+  NODES.forEach(n => nodeEls[n].g.classList.remove('active', 'is-start', 'is-end'));
+  
+  if(routeTypeSel.value === 'shortest') {
+    if(startSel.value) nodeEls[startSel.value].g.classList.add('is-start');
+    if(endSel.value && endSel.value !== startSel.value) nodeEls[endSel.value].g.classList.add('is-end');
+  } else {
+    if(startSel.value) nodeEls[startSel.value].g.classList.add('is-start');
+  }
+}
+resetGraphVisuals();
+
+[startSel, endSel, routeTypeSel].forEach(el => el.addEventListener('change', () => {
+  resetGraphVisuals(); currentPath=[]; renderResult(null);
+  triggerNodePop(startSel.value);
+}));
+
+function triggerNodePop(nodeId) {
+  if(!nodeEls[nodeId]) return;
+  const g = nodeEls[nodeId].g;
+  g.classList.remove('pop'); void g.offsetWidth; g.classList.add('pop');
+}
+
+function dijkstra(start, end, metric) {
+  const dist = {}, prev = {};
+  NODES.forEach(n => { dist[n]=Infinity; prev[n]=null; });
+  dist[start] = 0;
+  const unvisited = new Set(NODES);
+  while (unvisited.size) {
+    let u = null;
+    unvisited.forEach(n => { if (u===null || dist[n]<dist[u]) u=n; });
+    if (dist[u]===Infinity || (end && u===end)) break;
+    unvisited.delete(u);
+    FULL_EDGES.filter(e=>e.from===u).forEach(e => {
+      const alt = dist[u] + e[metric];
+      if (alt < dist[e.to]) { dist[e.to]=alt; prev[e.to]=u; }
+    });
+  }
+  if(end) {
+    const path=[]; let cur=end;
+    while(cur){ path.unshift(cur); cur=prev[cur]; }
+    if(path[0]!==start) return null;
+    return path;
+  }
+  return {dist, prev}; 
+}
+
+function nearestNeighborTSP(start, metric) {
+  let unvisited = new Set(NODES);
+  unvisited.delete(start);
+  let current = start;
+  let tour = [start];
+
+  while(unvisited.size > 0) {
+    const paths = dijkstra(current, null, metric);
+    let nearest = null, minDist = Infinity;
+    
+    unvisited.forEach(n => {
+      if(paths.dist[n] < minDist) { minDist = paths.dist[n]; nearest = n; }
+    });
+
+    if(!nearest) return null; 
+
+    let subPath = [];
+    let cur = nearest;
+    while(cur !== current) { subPath.unshift(cur); cur = paths.prev[cur]; }
+    
+    tour = tour.concat(subPath);
+    unvisited.delete(nearest);
+    current = nearest;
+  }
+  return tour;
+}
+
+function calculatePathStats(path) {
+  let totalDist=0, totalTime=0, totalFuel=0;
+  for(let i=0;i<path.length-1;i++){
+    const edge = FULL_EDGES.find(e=>e.from===path[i] && e.to===path[i+1]);
+    if(edge){totalDist+=edge.distance;totalTime+=edge.time;totalFuel+=edge.fuel;}
+  }
+  return {path, totalDist, totalTime, totalFuel:totalFuel.toFixed(1)};
+}
+
+function renderResult(res) {
+  const div = document.getElementById('result-content');
+  div.style.opacity = '0';
+  setTimeout(() => {
+    if (!res) {
+      div.innerHTML = '<div class="placeholder"><i class="fa-solid fa-map"></i>Select routing mode<br>and click Find</div>';
+    } else if (res.error) {
+      sfx.error();
+      div.innerHTML = `<div class="error"><i class="fa-solid fa-triangle-exclamation"></i> ${res.error}</div>`;
+    } else {
+      sfx.success();
+      const m = document.getElementById('metric').value;
+      const metricLabel = {distance:'Distance',time:'Time',fuel:'Fuel'};
+
+      let pathHTML = '<div class="path-nodes">';
+      res.path.forEach((n,i) => {
+        pathHTML += `<span class="path-node" id="pn-${n}">${n}</span>`;
+        if(i<res.path.length-1) pathHTML += '<span class="path-arrow"><i class="fa-solid fa-arrow-right"></i></span>';
+      });
+      pathHTML += '</div>';
+
+      const stats = [
+        {label:'<i class="fa-solid fa-ruler"></i> Dist',val:`${res.totalDist} km`,key:'distance'},
+        {label:'<i class="fa-solid fa-clock"></i> Time',val:`${res.totalTime} m`,key:'time'},
+        {label:'<i class="fa-solid fa-gas-pump"></i> Fuel',val:`${res.totalFuel} L`,key:'fuel'},
+      ];
+
+      let statsHTML = `<div style="display:flex; gap:10px;">` + stats.map((s, idx)=>`
+        <div class="stat-box" style="flex:1; animation: slideUpFade 0.4s forwards; animation-delay: ${idx * 0.1}s; opacity: 0;">
+          <div class="stat-label">${s.label}</div>
+          <div class="stat-value ${m===s.key?'text-gradient':''}">${s.val}</div>
+        </div>`).join('') + `</div>`;
+
+      let stepsHTML = '<div class="step-list">';
+      res.path.slice(0,-1).forEach((n,i)=>{
+        const edge = FULL_EDGES.find(e=>e.from===n && e.to===res.path[i+1]);
+        if(edge) stepsHTML+=`<div class="step-row"><span>${n} <i class="fa-solid fa-arrow-right" style="font-size:10px; margin:0 4px; opacity:0.6;"></i> ${res.path[i+1]}</span><span class="step-right">${edge.distance}km · ${edge.time}m · ${edge.fuel}L</span></div>`;
+      });
+      stepsHTML += '</div>';
+
+      const routeTypeName = document.getElementById('routeType').value === 'tsp' ? 'Complete Tour' : 'Shortest Path';
+
+      div.innerHTML = `
+        <div style="font-size:11px; font-weight:600; color:var(--dim); margin-bottom:12px; text-transform:uppercase; animation: slideUpFade 0.3s forwards;">${routeTypeName} | Optimized for: <span class="text-gradient" style="animation:none; background-size:100%;">${metricLabel[m]}</span></div>
+        ${pathHTML}
+        ${statsHTML}
+        <div style="margin-top:16px; padding:16px; background:var(--input-bg); border:1px solid var(--glass-border); border-radius:12px; animation: slideUpFade 0.5s forwards; animation-delay: 0.3s; opacity: 0;">
+          <div style="font-size:11px; font-weight:600; color:var(--dim); letter-spacing:1px; margin-bottom:10px; text-transform:uppercase;"><i class="fa-solid fa-shoe-prints"></i> Steps</div>
+          ${stepsHTML}
+        </div>`;
+    }
+    div.style.transition = 'opacity 0.3s';
+    div.style.opacity = '1';
+  }, 200);
+}
+
+function animatePath(path) {
+  if(animInterval) clearInterval(animInterval);
+  let step = 0;
+  animInterval = setInterval(() => {
+    if(step >= path.length) { clearInterval(animInterval); return; }
+    const n = path[step];
+    nodeEls[n].g.classList.remove('is-start', 'is-end');
+    nodeEls[n].g.classList.add('active');
+    sfx.tick(); 
+    const el = document.getElementById('pn-'+n);
+    if(el) el.classList.add('active');
+    step++;
+  }, 380);
+}
+
+function highlightPathEdges(path) {
+  const pathSet = new Set();
+  for(let i=0;i<path.length-1;i++) {
+    const p1 = path[i], p2 = path[i+1];
+    pathSet.add(`${p1}-${p2}`);
+    pathSet.add(`${p2}-${p1}`);
+  }
+
+  edgeEls.forEach(({line,arrow,edge,idx}) => {
+    const key = `${edge.from}-${edge.to}`;
+    const inPath = pathSet.has(key);
+    if(inPath){
+      line.classList.add('path');
+      arrow.classList.add('path');
+    }
+    const row = document.getElementById('erow-'+idx);
+    if(row){
+      row.className = inPath?'path-row':'';
+      row.querySelectorAll('td').forEach((td,ci)=>{
+        const m = document.getElementById('metric').value;
+        td.className = (inPath && ((m==='distance'&&ci===2)||(m==='time'&&ci===3)||(m==='fuel'&&ci===4))) ? 'hl' : '';
+      });
+    }
+  });
+}
+
+document.getElementById('findBtn').addEventListener('click', () => {
+  const start = startSel.value, end = endSel.value;
+  const metric = document.getElementById('metric').value;
+  const mode = document.getElementById('routeType').value;
+  
+  sfx.pop();
+  
+  if(mode === 'shortest' && start === end){ renderResult({error:'Start and End nodes must be different.'}); return; }
+  
+  let rawPath = null;
+  if(mode === 'tsp') {
+    rawPath = nearestNeighborTSP(start, metric);
+  } else {
+    rawPath = dijkstra(start, end, metric);
+  }
+
+  if(!rawPath){ renderResult({error:'No valid path found.'}); return; }
+  
+  const res = calculatePathStats(rawPath);
+  currentPath = res.path;
+  resetGraphVisuals();
+  renderResult(res);
+  highlightPathEdges(res.path);
+  animatePath(res.path);
+});
+</script>
+</body>
+</html>
