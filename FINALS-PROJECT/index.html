@@ -1150,7 +1150,7 @@ function median(arr) {
 ════════════════════════════════════════════════════════════════════ */
 
 /**
- * STUDENT 1 - loadDataset()
+ * STUDENT 1 TODO — loadDataset()
  */
 function loadDataset() {
   // 1. Clone RAW_DATA into window.DS
@@ -1165,28 +1165,28 @@ function loadDataset() {
   // 4. Update row count badge
   document.getElementById('rowCount').textContent = `${window.DS.length} rows`;
   
-  // 5. Signal readiness to Student 2
+  // 5. Signal readiness so Student 2's code can run
   onDataReady();
 }
 
 /**
- * STUDENT 1 - renderTable(data)
+ * STUDENT 1 TODO — renderTable(data)
  */
 function renderTable(data) {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = ''; // Clear existing rows
 
-  // Empty state handling
+  // Handle Empty State
   if (data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;">No results found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text-dim);">No results found.</td></tr>';
     return;
   }
 
   // Build rows
-  data.forEach((student, i) => {
+  data.forEach((student, index) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${i + 1}</td>
+      <td class="num">${index + 1}</td>
       <td>${student.name}</td>
       <td class="num">${student.studyHours}</td>
       <td class="num">${student.attendance}</td>
@@ -1202,18 +1202,18 @@ function renderTable(data) {
 }
 
 /**
- * STUDENT 1 - applyFilterSort()
+ * STUDENT 1 TODO — applyFilterSort()
  */
 function applyFilterSort() {
   const query = document.getElementById('filterInput').value.toLowerCase();
   const sortKey = document.getElementById('sortSelect').value;
 
-  // 1. Filter by name
+  // Filter case-insensitive match on name
   let filtered = window.DS.filter(d => 
     d.name.toLowerCase().includes(query)
   );
 
-  // 2. Sort the filtered data
+  // Sort based on selection
   if (sortKey) {
     filtered.sort((a, b) => {
       if (sortKey === 'name' || sortKey === 'grade') {
@@ -1226,51 +1226,53 @@ function applyFilterSort() {
     });
   }
 
-  // 3. Render and update count
+  // Update DOM
   renderTable(filtered);
   document.getElementById('rowCount').textContent = `${filtered.length} rows`;
 }
 
 /**
- * STUDENT 1 - resetTable()
+ * STUDENT 1 TODO — resetTable()
  */
 function resetTable() {
   // Clear inputs
   document.getElementById('filterInput').value = '';
   document.getElementById('sortSelect').value = '';
   
-  // Restore original view
+  // Restore full table
   renderTable(window.DS);
+  
+  // Update count
   document.getElementById('rowCount').textContent = `${window.DS.length} rows`;
 }
 
 /**
- * STUDENT 1 - renderSummaryCards(data)
+ * STUDENT 1 TODO — renderSummaryCards(data)
  */
 function renderSummaryCards(data) {
-  // Handle empty state if filtering removes all rows
-  if (!data || data.length === 0) {
+  // Graceful fallback if data is empty from aggressive filtering
+  if (data.length === 0) {
     document.getElementById('cardMeanScore').innerHTML = '<span class="placeholder-val">—</span>';
-    document.getElementById('cardTopScorer').innerHTML = '<span class="placeholder-val">—</span>';
+    document.getElementById('cardTopScorer').innerHTML = '<span class="placeholder-val" style="font-size:1.4rem;">—</span>';
     document.getElementById('cardPassRate').innerHTML = '<span class="placeholder-val">—</span>';
     document.getElementById('cardAvgHours').innerHTML = '<span class="placeholder-val">—</span>';
     return;
   }
 
-  // #cardMeanScore
+  // Mean Final Score
   const meanScore = mean(data.map(d => d.score)).toFixed(1);
   document.getElementById('cardMeanScore').innerHTML = meanScore;
 
-  // #cardTopScorer
-  const topStudent = data.reduce((best, d) => d.score > best.score ? d : best, data[0]);
-  document.getElementById('cardTopScorer').innerHTML = topStudent.name;
+  // Top Scorer
+  const topScorer = data.reduce((best, d) => (d.score > best.score ? d : best)).name;
+  document.getElementById('cardTopScorer').innerHTML = topScorer;
 
-  // #cardPassRate
+  // Pass Rate
   const passingStudents = data.filter(d => d.score >= 60).length;
   const passRate = Math.round((passingStudents / data.length) * 100);
   document.getElementById('cardPassRate').innerHTML = `${passRate}%`;
 
-  // #cardAvgHours
+  // Avg Study Hours
   const avgHours = mean(data.map(d => d.studyHours)).toFixed(1);
   document.getElementById('cardAvgHours').innerHTML = avgHours;
 }
