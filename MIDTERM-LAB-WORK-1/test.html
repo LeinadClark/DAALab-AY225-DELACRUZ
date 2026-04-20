@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network PathFinder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --surface: #10141c; --panel: #141920; --border: #1e2836;
+    --accent: #00e5ff; --accent3: #7fff6b; --gold: #ffd166; --text: #c8d8e8; --muted: #4a5f72;
+    --dist-color: #00e5ff; --time-color: #ff6b35; --fuel-color: #7fff6b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; font-weight: 300; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+  .app { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 32px 24px; }
+
+  header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .logo-block h1 { font-size: 2rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; }
+  .logo-block h1 span { color: var(--accent); font-family: 'Share Tech Mono', monospace; }
+  .logo-block p { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); margin-top: 4px; }
+  .status-bar { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--muted); text-align: right; line-height: 1.8; }
+  .status-bar .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); margin-right: 6px; vertical-align: middle; }
+  .status-bar .dot.active { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
+
+  .upload-zone { border: 1.5px dashed var(--border); border-radius: 4px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--surface); position: relative; overflow: hidden; }
+  .upload-zone::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,229,255,0.04) 0%, transparent 60%); pointer-events: none; }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); background: #0d1620; }
+  .upload-zone input { display: none; }
+  .upload-icon { width: 52px; height: 52px; margin: 0 auto 16px; border: 1.5px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+  .upload-zone h3 { font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .upload-zone p { font-size: 0.8rem; color: var(--muted); }
+  .upload-zone .badge { display: inline-block; margin-top: 12px; padding: 3px 10px; font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; border: 1px solid var(--border); border-radius: 2px; color: var(--muted); letter-spacing: 0.15em; }
+
+  .controls { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 16px; margin-top: 24px; align-items: end; }
+  .field-group { display: flex; flex-direction: column; gap: 8px; }
+  label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); font-family: 'Share Tech Mono', monospace; }
+  select { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; padding: 10px 14px; border-radius: 3px; outline: none; transition: border-color 0.2s; width: 100%; appearance: none; -webkit-appearance: none; }
+  select:focus { border-color: var(--accent); }
+  .btn { padding: 11px 28px; background: var(--accent); color: #000; border: none; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.14em; border-radius: 3px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn:hover { background: #33ecff; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); font-family: 'Share Tech Mono', monospace; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .data-preview { margin-top: 32px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-family: 'Share Tech Mono', monospace; }
+  thead th { background: #0d1218; padding: 10px 16px; text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid rgba(30,40,54,0.7); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(0,229,255,0.03); }
+  tbody td { padding: 9px 16px; color: var(--text); }
+  tbody td:first-child { color: var(--accent); }
+
+  /* ── Graph ── */
+  .graph-section { margin-top: 32px; }
+
+  .graph-toolbar {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .gtb-btn {
+    padding: 5px 13px; background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); font-family: 'Share Tech Mono', monospace; font-size: 0.63rem;
+    letter-spacing: 0.12em; text-transform: uppercase; border-radius: 2px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .gtb-btn:hover { border-color: var(--accent); color: var(--text); }
+  .gtb-btn.active { background: rgba(0,229,255,0.08); border-color: var(--accent); color: var(--accent); }
+  .gtb-btn.dist-btn.active { background: rgba(0,229,255,0.08); border-color: var(--dist-color); color: var(--dist-color); }
+  .gtb-btn.time-btn.active { background: rgba(255,107,53,0.08); border-color: var(--time-color); color: var(--time-color); }
+  .gtb-btn.fuel-btn.active { background: rgba(127,255,107,0.08); border-color: var(--fuel-color); color: var(--fuel-color); }
+  .gtb-sep { width: 1px; height: 22px; background: var(--border); margin: 0 2px; }
+  .gtb-hint { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--muted); margin-left: auto; }
+  .gtb-hint b { color: var(--gold); }
+
+  .graph-wrap { position: relative; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--surface); }
+  #graphCanvas { width: 100%; height: 460px; display: block; cursor: default; }
+  .graph-overlay-hint {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em;
+    color: var(--muted); background: rgba(10,12,16,0.8); padding: 4px 14px;
+    border-radius: 2px; border: 1px solid var(--border); pointer-events: none;
+    white-space: nowrap; transition: opacity 0.5s;
+  }
+  .graph-overlay-hint.hidden { opacity: 0; }
+
+  /* ── Floating node tooltip ── */
+  #nodeTooltip {
+    position: fixed; pointer-events: none; z-index: 200;
+    background: #0b1220; border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 5px; padding: 14px 16px; min-width: 210px; max-width: 280px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,229,255,0.06);
+    display: none;
+  }
+  .tt-header {
+    display: flex; align-items: center; gap: 9px;
+    margin-bottom: 11px; padding-bottom: 9px; border-bottom: 1px solid var(--border);
+  }
+  .tt-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .tt-node-label { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 0.18em; }
+  .tt-badge { margin-left: auto; font-family: 'Share Tech Mono', monospace; font-size: 0.58rem; color: var(--muted); padding: 2px 6px; border: 1px solid var(--border); border-radius: 2px; }
+  .tt-edge { margin-bottom: 9px; }
+  .tt-edge:last-child { margin-bottom: 0; }
+  .tt-edge-title { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text); margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+  .tt-edge-title .arr { color: var(--muted); }
+  .tt-edge-title .nb { color: var(--gold); font-weight: 600; }
+  .tt-metrics { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tt-m { font-family: 'Share Tech Mono', monospace; font-size: 0.63rem; padding: 2px 8px; border-radius: 2px; }
+  .tt-m.d { background: rgba(0,229,255,0.1);   color: var(--dist-color); }
+  .tt-m.t { background: rgba(255,107,53,0.1);  color: var(--time-color); }
+  .tt-m.f { background: rgba(127,255,107,0.1); color: var(--fuel-color); }
+  .tt-footer { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); font-family: 'Share Tech Mono', monospace; font-size: 0.58rem; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+  .tt-footer .tt-pin { color: var(--gold); }
+
+  /* Results */
+  .results-section { margin-top: 32px; }
+  .path-result-card { background: var(--panel); border: 1px solid var(--border); border-top: 2px solid var(--accent); border-radius: 4px; padding: 24px 28px; margin-bottom: 24px; animation: fadeIn 0.4s ease forwards; }
+  .path-result-card.no-path { border-top-color: var(--time-color); }
+  .path-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .path-header-left { display: flex; align-items: center; gap: 14px; }
+  .path-icon { font-size: 1.8rem; }
+  .path-title-block .ph-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 3px; }
+  .path-title-block .ph-title { font-size: 1.2rem; font-weight: 700; color: #fff; }
+  .path-title-block .ph-title .from { color: var(--gold); }
+  .path-title-block .ph-title .arrow-sep { color: var(--muted); margin: 0 6px; }
+  .path-title-block .ph-title .to { color: var(--accent); }
+  .path-metric-badge { font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.15em; padding: 5px 12px; border-radius: 2px; border: 1px solid; }
+  .path-metric-badge.dist { color: var(--dist-color); border-color: var(--dist-color); background: rgba(0,229,255,0.06); }
+  .path-metric-badge.time { color: var(--time-color); border-color: var(--time-color); background: rgba(255,107,53,0.06); }
+  .path-metric-badge.fuel { color: var(--fuel-color); border-color: var(--fuel-color); background: rgba(127,255,107,0.06); }
+  .path-chain { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; padding: 16px 20px; background: rgba(0,0,0,0.2); border-radius: 3px; border: 1px solid var(--border); }
+  .path-chain .p-node { padding: 6px 14px; border-radius: 3px; font-family: 'Share Tech Mono', monospace; font-size: 0.88rem; font-weight: 700; }
+  .path-chain .p-node.start { background: rgba(255,209,102,0.15); color: var(--gold); border: 1px solid rgba(255,209,102,0.35); }
+  .path-chain .p-node.end { background: rgba(0,229,255,0.12); color: var(--accent); border: 1px solid rgba(0,229,255,0.35); }
+  .path-chain .p-node.mid { background: rgba(255,255,255,0.04); color: var(--text); border: 1px solid var(--border); }
+  .path-chain .p-arrow { color: var(--muted); font-size: 1.1rem; }
+  .stats-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+  .stat-card { flex: 1; min-width: 120px; padding: 14px 18px; border-radius: 3px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+  .stat-card .sc-icon { font-size: 1.2rem; margin-bottom: 6px; }
+  .stat-card .sc-label { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin-bottom: 5px; }
+  .stat-card .sc-val { font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; font-weight: 700; }
+  .stat-card .sc-val.optimized { position: relative; }
+  .stat-card .sc-val.optimized::after { content: '★ OPTIMIZED'; font-size: 0.55rem; letter-spacing: 0.15em; position: absolute; top: -8px; right: 0; padding: 1px 5px; border-radius: 2px; }
+  .stat-card.dist .sc-val { color: var(--dist-color); } .stat-card.dist { border-top: 2px solid var(--dist-color); } .stat-card.dist .sc-val.optimized::after { background: rgba(0,229,255,0.15); color: var(--dist-color); }
+  .stat-card.time .sc-val { color: var(--time-color); } .stat-card.time { border-top: 2px solid var(--time-color); } .stat-card.time .sc-val.optimized::after { background: rgba(255,107,53,0.15); color: var(--time-color); }
+  .stat-card.fuel .sc-val { color: var(--fuel-color); } .stat-card.fuel { border-top: 2px solid var(--fuel-color); } .stat-card.fuel .sc-val.optimized::after { background: rgba(127,255,107,0.15); color: var(--fuel-color); }
+  .alt-section-title { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .alt-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .alt-metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .alt-metric-panel { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+  .alt-metric-header { padding: 10px 14px 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .alt-metric-header .amh-label { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.15em; }
+  .alt-metric-header.dist .amh-label { color: var(--dist-color); } .alt-metric-header.dist .amh-val { color: var(--dist-color); }
+  .alt-metric-header.time .amh-label { color: var(--time-color); } .alt-metric-header.time .amh-val { color: var(--time-color); }
+  .alt-metric-header.fuel .amh-label { color: var(--fuel-color); } .alt-metric-header.fuel .amh-val { color: var(--fuel-color); }
+  .alt-metric-header .amh-val { font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; font-weight: 700; }
+  .alt-metric-body { padding: 10px 14px; }
+  .alt-path-chips { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+  .alt-path-chips .ac { padding: 2px 8px; border-radius: 2px; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; }
+  .alt-metric-panel.dist .ac { background: rgba(0,229,255,0.08); color: var(--dist-color); }
+  .alt-metric-panel.time .ac { background: rgba(255,107,53,0.08); color: var(--time-color); }
+  .alt-metric-panel.fuel .ac { background: rgba(127,255,107,0.08); color: var(--fuel-color); }
+  .alt-path-chips .ach { color: var(--muted); font-size: 0.7rem; }
+  .alt-route-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; border-bottom: 1px solid rgba(30,40,54,0.4); cursor: pointer; transition: background 0.12s; }
+  .alt-route-item:last-child { border-bottom: none; }
+  .alt-route-item:hover { background: rgba(255,255,255,0.03); }
+  .alt-route-item.highlighted { background: rgba(0,229,255,0.06); outline: 1px solid rgba(0,229,255,0.15); }
+  .alt-route-left { display: flex; flex-direction: column; gap: 4px; }
+  .alt-route-rank { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .alt-route-rank span { color: var(--accent); }
+  .alt-route-chips { display: flex; align-items: center; flex-wrap: wrap; gap: 3px; }
+  .alt-route-chips .arc { padding: 2px 7px; border-radius: 2px; font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; background: rgba(0,229,255,0.08); color: var(--dist-color); }
+  .alt-route-chips .arch { color: var(--muted); font-size: 0.65rem; }
+  .alt-route-right { font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; color: var(--text); flex-shrink: 0; margin-left: 12px; }
+  .no-path-msg { text-align: center; padding: 40px 20px; }
+  .no-path-msg .npm-icon { font-size: 2rem; margin-bottom: 10px; }
+  .no-path-msg .npm-title { font-size: 1.1rem; font-weight: 600; color: var(--time-color); margin-bottom: 6px; }
+  .no-path-msg .npm-sub { font-size: 0.8rem; color: var(--muted); font-family: 'Share Tech Mono', monospace; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  @media (max-width: 900px) { .controls { grid-template-columns: 1fr 1fr; } .alt-metrics-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { header { flex-direction: column; align-items: flex-start; gap: 12px; } .controls { grid-template-columns: 1fr; } }
+  .fade-in { animation: fadeIn 0.4s ease forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo-block">
+      <h1>Net<span>PATH</span>finder</h1>
+      <p>Point-to-Point Shortest Path Analyzer</p>
+    </div>
+    <div class="status-bar">
+      <div><span class="dot" id="statusDot"></span><span id="statusText">AWAITING INPUT</span></div>
+      <div id="nodeCountStatus">NODES: —</div>
+      <div id="edgeCountStatus">EDGES: —</div>
+    </div>
+  </header>
+
+  <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+    <div class="upload-icon">📂</div>
+    <h3>Drop Excel / CSV File Here</h3>
+    <p>Columns expected: From · To · Distance · Time · Fuel</p>
+    <span class="badge">XLSX · XLS · CSV</span>
+  </div>
+
+  <div class="controls" id="controls" style="display:none">
+    <div class="field-group"><label>From Node</label><select id="fromNode"></select></div>
+    <div class="field-group"><label>To Node</label><select id="toNode"></select></div>
+    <div class="field-group">
+      <label>Optimize By</label>
+      <select id="metricSelect" onchange="needsRedraw=true">
+        <option value="distance">Distance (km)</option>
+        <option value="time">Time (min)</option>
+        <option value="fuel">Fuel (L)</option>
+      </select>
+    </div>
+    <button class="btn" onclick="runPathfinder()">Find Shortest Path</button>
+  </div>
+
+  <div class="data-preview" id="dataPreview" style="display:none">
+    <div class="section-title">Loaded Edge Data</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>From</th><th>To</th><th>Distance (km)</th><th>Time (min)</th><th>Fuel (L)</th></tr></thead>
+        <tbody id="edgeTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="graph-section" id="graphSection" style="display:none">
+    <div class="section-title">Network Graph</div>
+    <div class="graph-toolbar">
+      <button class="gtb-btn active" id="modeAll"  onclick="setMode('all')">All Edges</button>
+      <button class="gtb-btn"        id="modePath" onclick="setMode('path')">Path Only</button>
+      <div class="gtb-sep"></div>
+      <button class="gtb-btn dist-btn active" id="lbDist" onclick="toggleLabel('distance')">📏 Dist</button>
+      <button class="gtb-btn time-btn active" id="lbTime" onclick="toggleLabel('time')">⚡ Time</button>
+      <button class="gtb-btn fuel-btn active" id="lbFuel" onclick="toggleLabel('fuel')">⛽ Fuel</button>
+      <div class="gtb-sep"></div>
+      <button class="gtb-btn" id="clearPin" onclick="clearPin()" style="display:none">✕ Unpin</button>
+      <span class="gtb-hint">Hover to inspect · <b>Click</b> to pin node</span>
+    </div>
+    <div class="graph-wrap">
+      <canvas id="graphCanvas"></canvas>
+      <div class="graph-overlay-hint" id="graphHint">HOVER OR CLICK A NODE TO EXPLORE ITS CONNECTIONS</div>
+    </div>
+  </div>
+
+  <div class="results-section" id="resultsSection" style="display:none"></div>
+</div>
+
+<!-- Floating node info tooltip -->
+<div id="nodeTooltip">
+  <div class="tt-header">
+    <div class="tt-dot" id="ttDot"></div>
+    <span class="tt-node-label" id="ttLabel"></span>
+    <span class="tt-badge" id="ttBadge"></span>
+  </div>
+  <div id="ttEdges"></div>
+  <div class="tt-footer">
+    <span id="ttFooterLeft"></span>
+    <span class="tt-pin" id="ttFooterRight"></span>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+let edges = [], nodes = new Set();
+let currentPathData   = null;
+let highlightedAltIdx = null;
+let graphMode  = 'all';
+let labelVis   = { distance: true, time: true, fuel: true };
+let hoveredNode = null;
+let pinnedNode  = null;
+let nodePos     = {};   // n → {x,y}
+let glowPhase   = 0;
+let needsRedraw = true;
+let rafId       = null;
+let eventsReady = false;   // guard — canvas listeners registered only once
+
+const CMAP = { distance: '#00e5ff', time: '#ff6b35', fuel: '#7fff6b' };
+const NODE_HIT_R = 20;  // px, hit-test radius
+
+// ══════════════════════════════════════════════════════════
+// UPLOAD / PARSE
+// ══════════════════════════════════════════════════════════
+const dropZone  = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
+
+function processFile(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      parseData(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }));
+    } catch(err) { alert('Error: ' + err.message); }
+  };
+  r.readAsArrayBuffer(file);
+}
+
+function parseData(rows) {
+  const start = (rows[0] && isNaN(Number(rows[0][0]))) ? 1 : 0;
+  edges = []; nodes = new Set();
+  for (let i = start; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || row.length < 5) continue;
+    const from = String(row[0]).trim(), to = String(row[1]).trim();
+    const dist = parseFloat(row[2]), time = parseFloat(row[3]), fuel = parseFloat(row[4]);
+    if (!from || !to || isNaN(dist) || isNaN(time) || isNaN(fuel)) continue;
+    edges.push({ from, to, distance: dist, time, fuel });
+    nodes.add(from); nodes.add(to);
+  }
+  if (!edges.length) { alert('No valid data found.'); return; }
+  initUI();
+}
+
+function initUI() {
+  // ── Reset all interaction state from any previous dataset ──
+  hoveredNode = null;
+  pinnedNode  = null;
+  currentPathData   = null;
+  highlightedAltIdx = null;
+  document.getElementById('nodeTooltip').style.display = 'none';
+  document.getElementById('clearPin').style.display    = 'none';
+  document.getElementById('graphHint').classList.remove('hidden');
+  document.getElementById('resultsSection').style.display = 'none';
+
+  document.getElementById('statusDot').classList.add('active');
+  document.getElementById('statusText').textContent = 'DATA LOADED';
+  document.getElementById('nodeCountStatus').textContent = `NODES: ${nodes.size}`;
+  document.getElementById('edgeCountStatus').textContent = `EDGES: ${edges.length}`;
+  dropZone.querySelector('h3').textContent = '✓ File Loaded Successfully';
+  dropZone.style.borderColor = 'var(--accent3)';
+  dropZone.style.borderStyle = 'solid';
+
+  const nodeArr = [...nodes].sort();
+  ['fromNode','toNode'].forEach((id, idx) => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '';
+    nodeArr.forEach(n => {
+      const o = document.createElement('option');
+      o.value = n; o.textContent = `Node ${n}`;
+      if (idx === 0 && n === nodeArr[0]) o.selected = true;
+      if (idx === 1 && n === nodeArr[nodeArr.length-1]) o.selected = true;
+      sel.appendChild(o);
+    });
+  });
+
+  const tbody = document.getElementById('edgeTableBody');
+  tbody.innerHTML = '';
+  edges.forEach((e, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${e.from}</td><td>${e.to}</td><td>${e.distance}</td><td>${e.time}</td><td>${e.fuel}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('controls').style.display    = 'grid';
+  document.getElementById('dataPreview').style.display  = 'block';
+  document.getElementById('graphSection').style.display = 'block';
+
+  computePositions();
+
+  // Clear the canvas immediately so the old graph disappears right away
+  const _canvas = document.getElementById('graphCanvas');
+  const _dpr = window.devicePixelRatio || 1;
+  const _W = _canvas.parentElement.clientWidth, _H = 460;
+  _canvas.width = _W * _dpr; _canvas.height = _H * _dpr;
+  _canvas.style.width = _W + 'px'; _canvas.style.height = _H + 'px';
+  _canvas.getContext('2d').clearRect(0, 0, _canvas.width, _canvas.height);
+  needsRedraw = true;
+
+  if (!eventsReady) { setupEvents(); eventsReady = true; }
+  startLoop();
+}
+
+// ══════════════════════════════════════════════════════════
+// TOOLBAR CONTROLS
+// ══════════════════════════════════════════════════════════
+function setMode(m) {
+  graphMode = m;
+  document.getElementById('modeAll').classList.toggle('active', m==='all');
+  document.getElementById('modePath').classList.toggle('active', m==='path');
+  needsRedraw = true;
+}
+function toggleLabel(key) {
+  labelVis[key] = !labelVis[key];
+  const ids = { distance:'lbDist', time:'lbTime', fuel:'lbFuel' };
+  const btn = document.getElementById(ids[key]);
+  btn.classList.toggle('active', labelVis[key]);
+  btn.style.opacity = labelVis[key] ? '1' : '0.38';
+  needsRedraw = true;
+}
+function clearPin() {
+  pinnedNode = null;
+  document.getElementById('clearPin').style.display = 'none';
+  document.getElementById('nodeTooltip').style.display = 'none';
+  needsRedraw = true;
+}
+
+// ══════════════════════════════════════════════════════════
+// NODE POSITIONS  (circular layout)
+// ══════════════════════════════════════════════════════════
+function computePositions() {
+  const canvas = document.getElementById('graphCanvas');
+  const W = canvas.parentElement.clientWidth, H = 460;
+  const arr = [...nodes].sort();
+  const cx = W/2, cy = H/2, r = Math.min(W,H) * 0.36;
+  nodePos = {};
+  arr.forEach((n,i) => {
+    const a = (2*Math.PI*i/arr.length) - Math.PI/2;
+    nodePos[n] = { x: cx + r*Math.cos(a), y: cy + r*Math.sin(a) };
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// CANVAS EVENTS
+// ══════════════════════════════════════════════════════════
+function hitTest(cx, cy) {
+  for (const n of nodes) {
+    const p = nodePos[n]; if(!p) continue;
+    const dx=p.x-cx, dy=p.y-cy;
+    if (Math.sqrt(dx*dx+dy*dy) <= NODE_HIT_R) return n;
+  }
+  return null;
+}
+
+function canvasCoords(e) {
+  const canvas = document.getElementById('graphCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const dpr  = window.devicePixelRatio || 1;
+  return {
+    cx: (e.clientX - rect.left) * (canvas.width/dpr) / rect.width,
+    cy: (e.clientY - rect.top)  * (canvas.height/dpr) / rect.height,
+  };
+}
+
+function setupEvents() {
+  const canvas = document.getElementById('graphCanvas');
+
+  canvas.addEventListener('mousemove', e => {
+    const { cx, cy } = canvasCoords(e);
+    const hit = hitTest(cx, cy);
+    if (hit !== hoveredNode) {
+      hoveredNode = hit;
+      canvas.style.cursor = hit ? 'pointer' : 'default';
+      needsRedraw = true;
+    }
+    const activeNode = hit || pinnedNode;
+    if (activeNode) {
+      updateTooltip(activeNode, hit ? 'hover' : 'pinned', e.clientX, e.clientY);
+      document.getElementById('graphHint').classList.add('hidden');
+    } else {
+      if (!pinnedNode) document.getElementById('nodeTooltip').style.display = 'none';
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    hoveredNode = null;
+    canvas.style.cursor = 'default';
+    if (!pinnedNode) document.getElementById('nodeTooltip').style.display = 'none';
+    needsRedraw = true;
+  });
+
+  canvas.addEventListener('click', e => {
+    const { cx, cy } = canvasCoords(e);
+    const hit = hitTest(cx, cy);
+    if (!hit) return;
+    if (hit === pinnedNode) {
+      // toggle off
+      pinnedNode = null;
+      document.getElementById('clearPin').style.display = 'none';
+      document.getElementById('nodeTooltip').style.display = 'none';
+    } else {
+      pinnedNode = hit;
+      document.getElementById('clearPin').style.display = 'inline-block';
+      updateTooltip(hit, 'pinned', e.clientX, e.clientY);
+    }
+    needsRedraw = true;
+  });
+
+  window.addEventListener('resize', () => { computePositions(); needsRedraw = true; });
+}
+
+// ══════════════════════════════════════════════════════════
+// TOOLTIP
+// ══════════════════════════════════════════════════════════
+function updateTooltip(nodeId, mode, mx, my) {
+  const tip  = document.getElementById('nodeTooltip');
+
+  // Deduplicate by neighbor — both "A→B" and "B→A" rows refer to the same connection
+  const seenNeighbors = new Set();
+  const conns = [];
+  edges.forEach(e => {
+    if (e.from === nodeId || e.to === nodeId) {
+      const nb = e.from === nodeId ? e.to : e.from;
+      if (!seenNeighbors.has(nb)) { seenNeighbors.add(nb); conns.push({ nb, e }); }
+    }
+  });
+
+  const isStart = currentPathData && nodeId === currentPathData.from;
+  const isEnd   = currentPathData && nodeId === currentPathData.to;
+
+  document.getElementById('ttDot').style.cssText = `
+    width:9px;height:9px;border-radius:50%;flex-shrink:0;
+    background:${isStart?'#ffd166':isEnd?'#00e5ff':'#00e5ff'};
+    box-shadow:0 0 6px ${isStart?'#ffd166':'#00e5ff'};`;
+  document.getElementById('ttLabel').textContent  = `NODE ${nodeId}`;
+  document.getElementById('ttBadge').textContent  = isStart ? 'START' : isEnd ? 'END' : `${conns.length} edge${conns.length!==1?'s':''}`;
+
+  document.getElementById('ttEdges').innerHTML = conns.map(({ nb, e }) => {
+    const parts = [];
+    if (labelVis.distance) parts.push(`<span class="tt-m d">📏 ${e.distance} km</span>`);
+    if (labelVis.time    ) parts.push(`<span class="tt-m t">⚡ ${e.time} min</span>`);
+    if (labelVis.fuel    ) parts.push(`<span class="tt-m f">⛽ ${e.fuel} L</span>`);
+    return `<div class="tt-edge">
+      <div class="tt-edge-title"><span class="arr">↔</span><span class="nb">Node ${nb}</span></div>
+      <div class="tt-metrics">${parts.join('')}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('ttFooterLeft').textContent  = `${conns.length} connection${conns.length!==1?'s':''}`;
+  document.getElementById('ttFooterRight').textContent = mode === 'pinned' ? '📌 pinned — click to unpin' : 'click to pin';
+
+  tip.style.display = 'block';
+  const TW = 240, TH = tip.scrollHeight || 160;
+  let tx = mx + 16, ty = my - 12;
+  if (tx + TW > window.innerWidth - 8)  tx = mx - TW - 12;
+  if (ty + TH > window.innerHeight - 8) ty = window.innerHeight - TH - 8;
+  if (ty < 8) ty = 8;
+  tip.style.left = tx + 'px';
+  tip.style.top  = ty + 'px';
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER LOOP
+// ══════════════════════════════════════════════════════════
+function startLoop() {
+  if (rafId) cancelAnimationFrame(rafId);
+  function loop() {
+    glowPhase = (glowPhase + 0.045) % (Math.PI * 2);
+    if (hoveredNode || pinnedNode) needsRedraw = true;
+    if (needsRedraw) { draw(); needsRedraw = false; }
+    rafId = requestAnimationFrame(loop);
+  }
+  rafId = requestAnimationFrame(loop);
+}
+
+// ══════════════════════════════════════════════════════════
+// DIJKSTRA + ALL-PATHS
+// ══════════════════════════════════════════════════════════
+function dijkstra(src, wKey) {
+  const arr = [...nodes];
+  const dist={}, prev={};
+  arr.forEach(n => { dist[n]=Infinity; prev[n]=null; });
+  dist[src]=0;
+  const adj={};
+  arr.forEach(n => adj[n]=[]);
+  edges.forEach(e => {
+    adj[e.from].push({node:e.to,   w:e[wKey], edge:e});
+    adj[e.to  ].push({node:e.from, w:e[wKey], edge:e});
+  });
+  const vis=new Set();
+  while (true) {
+    let u=null;
+    arr.forEach(n => { if(!vis.has(n)&&(u===null||dist[n]<dist[u])) u=n; });
+    if(!u||dist[u]===Infinity) break;
+    vis.add(u);
+    adj[u].forEach(({node:v,w,edge}) => { const a=dist[u]+w; if(a<dist[v]){dist[v]=a;prev[v]={from:u,edge};} });
+  }
+  const paths={};
+  arr.forEach(n => {
+    if(n===src)return;
+    const path=[], el=[];
+    let cur=n;
+    while(cur!==null){ path.unshift(cur); if(prev[cur]){el.unshift(prev[cur].edge);cur=prev[cur].from;}else cur=null; }
+    let d=0,t=0,f=0;
+    el.forEach(e=>{d+=e.distance;t+=e.time;f+=e.fuel;});
+    paths[n]={path,cost:dist[n],distance:d,time:t,fuel:f};
+  });
+  return paths;
+}
+
+function allPaths(src, dst, wKey) {
+  const adj={};
+  [...nodes].forEach(n => adj[n]=new Map());
+  edges.forEach(e=>{adj[e.from].set(e.to,e);adj[e.to].set(e.from,e);});
+  const seen=new Set(), res=[];
+  const q=[{node:src,path:[src],el:[],vis:new Set([src])}];
+  while(q.length) {
+    const {node,path,el,vis}=q.shift();
+    if(node===dst&&path.length>1){
+      const sig=path.join(',');
+      if(!seen.has(sig)){ seen.add(sig); let d=0,t=0,f=0; el.forEach(e=>{d+=e.distance;t+=e.time;f+=e.fuel;}); res.push({path:[...path],distance:d,time:t,fuel:f,cost:el.reduce((s,e)=>s+e[wKey],0)}); }
+      continue;
+    }
+    adj[node].forEach((eo,nx) => { if(!vis.has(nx)){ const nv=new Set(vis);nv.add(nx); q.push({node:nx,path:[...path,nx],el:[...el,eo],vis:nv}); } });
+    if(res.length>80) break;
+  }
+  return res.sort((a,b)=>a.cost-b.cost);
+}
+
+// ══════════════════════════════════════════════════════════
+// PATHFINDER
+// ══════════════════════════════════════════════════════════
+function runPathfinder() {
+  const from   = document.getElementById('fromNode').value;
+  const to     = document.getElementById('toNode').value;
+  const metric = document.getElementById('metricSelect').value;
+  if (from===to) { alert('From and To nodes must be different.'); return; }
+  const paths  = dijkstra(from, metric);
+  const result = paths[to];
+  currentPathData   = { from, to, metric, result };
+  highlightedAltIdx = null;
+  pinnedNode        = null;
+  document.getElementById('clearPin').style.display = 'none';
+  document.getElementById('statusText').textContent = result ? 'PATH FOUND' : 'NO PATH';
+  renderResults(from, to, metric, result);
+  needsRedraw = true;
+  document.getElementById('resultsSection').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ══════════════════════════════════════════════════════════
+// RESULTS PANEL
+// ══════════════════════════════════════════════════════════
+function renderResults(from, to, metric, result) {
+  const sec = document.getElementById('resultsSection');
+  sec.style.display = 'block';
+  if (!result||!result.path||result.path.length<1||!isFinite(result.cost)) {
+    sec.innerHTML=`<div class="path-result-card no-path fade-in"><div class="no-path-msg"><div class="npm-icon">⚠️</div><div class="npm-title">No Path Found</div><div class="npm-sub">Node ${from} → Node ${to} · No connected route exists</div></div></div>`;
+    return;
+  }
+  const ML={distance:'Distance',time:'Time',fuel:'Fuel'};
+  const MU={distance:'km',time:'min',fuel:'L'};
+  const MC={distance:'dist',time:'time',fuel:'fuel'};
+  const MI={distance:'📏',time:'⚡',fuel:'⛽'};
+  const mc=MC[metric];
+  const pathChain=result.path.map((n,i)=>{
+    const cls=i===0?'start':i===result.path.length-1?'end':'mid';
+    return `<span class="p-node ${cls}">Node ${n}</span>${i<result.path.length-1?'<span class="p-arrow">→</span>':''}`;
+  }).join('');
+  const alts=allPaths(from,to,metric);
+  const seenSig=result.path.join(',');
+  const altPaths=alts.filter(a=>a.path.join(',')!==seenSig).slice(0,5);
+  const om=['distance','time','fuel'].filter(m=>m!==metric);
+  const or2={};
+  om.forEach(m=>{const r=dijkstra(from,m);or2[m]=r[to];});
+  const amHtml=om.map(m=>{
+    const r=or2[m];
+    if(!r||!isFinite(r.cost))return`<div class="alt-metric-panel ${MC[m]}"><div class="alt-metric-header ${MC[m]}"><span class="amh-label">${MI[m]} ${ML[m]}-Optimal</span><span class="amh-val">N/A</span></div><div class="alt-metric-body"><span style="color:var(--muted);font-size:0.72rem;font-family:Share Tech Mono">No path</span></div></div>`;
+    const vf=m==='fuel'?r[m].toFixed(1):r[m];
+    const chips=r.path.map((n,i)=>`<span class="ac">Node ${n}</span>${i<r.path.length-1?'<span class="ach">→</span>':''}`).join('');
+    return`<div class="alt-metric-panel ${MC[m]}"><div class="alt-metric-header ${MC[m]}"><span class="amh-label">${MI[m]} ${ML[m]}-Optimal</span><span class="amh-val">${vf} ${MU[m]}</span></div><div class="alt-metric-body"><div class="alt-path-chips">${chips}</div></div></div>`;
+  }).join('');
+  const alHtml=altPaths.length?altPaths.map((a,i)=>{
+    const chips=a.path.map((n,j)=>`<span class="arc">Node ${n}</span>${j<a.path.length-1?'<span class="arch">→</span>':''}`).join('');
+    const vf=metric==='fuel'?a[metric].toFixed(1):a[metric];
+    return`<div class="alt-route-item" id="altItem-${i}" onmouseenter="hoverAlt(${i})" onmouseleave="unhoverAlt()"><div class="alt-route-left"><div class="alt-route-rank">Route <span>#${i+2}</span></div><div class="alt-route-chips">${chips}</div></div><div class="alt-route-right">${vf} ${MU[metric]}</div></div>`;
+  }).join(''):`<div style="padding:14px 16px;font-size:0.75rem;color:var(--muted);font-family:Share Tech Mono">No alternative routes found</div>`;
+  sec.innerHTML=`
+    <div class="section-title">Shortest Path Result</div>
+    <div class="path-result-card fade-in">
+      <div class="path-header">
+        <div class="path-header-left"><div class="path-icon">🗺️</div><div class="path-title-block">
+          <div class="ph-label">Shortest path · ${ML[metric]}-optimal</div>
+          <div class="ph-title"><span class="from">Node ${from}</span><span class="arrow-sep">→</span><span class="to">Node ${to}</span></div>
+        </div></div>
+        <span class="path-metric-badge ${mc}">${MI[metric]} ${ML[metric]}</span>
+      </div>
+      <div class="path-chain">${pathChain}</div>
+      <div class="stats-row">
+        <div class="stat-card dist"><div class="sc-icon">📏</div><div class="sc-label">Total Distance</div><div class="sc-val ${metric==='distance'?'optimized':''}">${result.distance} km</div></div>
+        <div class="stat-card time"><div class="sc-icon">⚡</div><div class="sc-label">Total Time</div><div class="sc-val ${metric==='time'?'optimized':''}">${result.time} min</div></div>
+        <div class="stat-card fuel"><div class="sc-icon">⛽</div><div class="sc-label">Total Fuel</div><div class="sc-val ${metric==='fuel'?'optimized':''}">${result.fuel.toFixed(1)} L</div></div>
+      </div>
+      <div class="alt-section-title">Optimal Paths for Other Metrics</div>
+      <div class="alt-metrics-grid">${amHtml}</div>
+      <div class="alt-section-title" style="margin-top:20px">Alternative Routes (${ML[metric]}-ranked)</div>
+      <div style="border:1px solid var(--border);border-radius:3px;overflow:hidden">${alHtml}</div>
+    </div>`;
+}
+
+function hoverAlt(idx) {
+  highlightedAltIdx=idx;
+  document.querySelectorAll('.alt-route-item').forEach((el,i)=>el.classList.toggle('highlighted',i===idx));
+  needsRedraw=true;
+}
+function unhoverAlt() {
+  highlightedAltIdx=null;
+  document.querySelectorAll('.alt-route-item').forEach(el=>el.classList.remove('highlighted'));
+  needsRedraw=true;
+}
+
+// ══════════════════════════════════════════════════════════
+// DRAW  — full graph renderer with node interaction
+// ══════════════════════════════════════════════════════════
+function draw() {
+  const canvas = document.getElementById('graphCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.parentElement.clientWidth, H = 460;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const metric = document.getElementById('metricSelect').value;
+  const color  = CMAP[metric];
+  const pulse  = 0.5 + 0.5*Math.sin(glowPhase);  // 0..1
+
+  // ── Resolve display path ──
+  let displayPath = [];
+  if (currentPathData?.result) {
+    displayPath = currentPathData.result.path || [];
+    if (highlightedAltIdx !== null) {
+      const {from,to,metric:m} = currentPathData;
+      const sig  = displayPath.join(',');
+      const alts = allPaths(from,to,m).filter(a=>a.path.join(',')!==sig);
+      if (alts[highlightedAltIdx]) displayPath = alts[highlightedAltIdx].path;
+    }
+  }
+  const pathEdges = new Set();
+  const pathNodes = new Set(displayPath);
+  for (let i=0;i<displayPath.length-1;i++) pathEdges.add(displayPath[i]+'|'+displayPath[i+1]);
+
+  // ── Focused node (hover > pin) ──
+  const focusNode = hoveredNode || pinnedNode;
+  const focusNeighbors = new Set();
+  const focusEdgeKeys  = new Set();   // "from||to" canonical (unordered)
+  if (focusNode) {
+    edges.forEach(e => {
+      if (e.from===focusNode){ focusNeighbors.add(e.to);   focusEdgeKeys.add(e.from+'||'+e.to); }
+      if (e.to  ===focusNode){ focusNeighbors.add(e.from); focusEdgeKeys.add(e.from+'||'+e.to); }
+    });
+  }
+  const hasFocus = !!focusNode;
+
+  ctx.clearRect(0,0,W,H);
+
+  // ── Utility ──
+  function rgba(hex, a) {
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+  function arrow(x1,y1,x2,y2) {
+    const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1)return;
+    const ux=dx/len,uy=dy/len,tx=x1+dx*0.6,ty=y1+dy*0.6,aL=8,aW=5;
+    ctx.beginPath();
+    ctx.moveTo(tx+ux*aL,ty+uy*aL);
+    ctx.lineTo(tx-ux*aL-uy*aW,ty-uy*aL+ux*aW);
+    ctx.lineTo(tx-ux*aL+uy*aW,ty-uy*aL-ux*aW);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // ── Edge labels ──
+  function edgeLabels(p1,p2,e,alpha,large) {
+    const tags=[];
+    if(labelVis.distance) tags.push({t:`${e.distance}km`, c:CMAP.distance});
+    if(labelVis.time    ) tags.push({t:`${e.time}m`,      c:CMAP.time    });
+    if(labelVis.fuel    ) tags.push({t:`${e.fuel}L`,      c:CMAP.fuel    });
+    if(!tags.length) return;
+    const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;
+    const dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.sqrt(dx*dx+dy*dy);
+    const px=len?-dy/len*13:0,py=len?dx/len*13:0;
+    const fsize = large ? 11 : 9;
+    const lh    = large ? 15 : 12;
+    const totalH = tags.length * lh;
+    tags.forEach((tag,i) => {
+      const lx=mx+px, ly=my+py - totalH/2 + i*lh + lh/2;
+      ctx.font=`${large?'bold ':''}${fsize}px Share Tech Mono,monospace`;
+      const tw=ctx.measureText(tag.t).width;
+      ctx.fillStyle='rgba(10,12,16,0.86)';
+      ctx.beginPath();
+      if(ctx.roundRect) ctx.roundRect(lx-tw/2-4,ly-7,tw+8,14,2);
+      else ctx.rect(lx-tw/2-4,ly-7,tw+8,14);
+      ctx.fill();
+      ctx.fillStyle=rgba(tag.c,alpha);
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(tag.t,lx,ly);
+    });
+  }
+
+  // ═══════════════════════════════
+  // PASS 1 — Ghost edges (dim all non-focus, non-path)
+  // ═══════════════════════════════
+  if (graphMode==='all') {
+    edges.forEach(e => {
+      const p1=nodePos[e.from],p2=nodePos[e.to]; if(!p1||!p2)return;
+      const ek=e.from+'||'+e.to;
+      const onPath  = pathEdges.has(e.from+'|'+e.to)||pathEdges.has(e.to+'|'+e.from);
+      const onFocus = focusEdgeKeys.has(ek);
+      if(onFocus||onPath) return;  // drawn in later passes
+
+      const ghostA = hasFocus ? 0.05 : (pathNodes.size ? 0.12 : 0.28);
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+      ctx.strokeStyle=rgba('#4a7090',ghostA); ctx.lineWidth=1; ctx.stroke();
+
+      // Show labels on ghost edges only when nothing else is active
+      if (!hasFocus && !pathNodes.size) edgeLabels(p1,p2,e,ghostA*3,false);
+    });
+  }
+
+  // ═══════════════════════════════
+  // PASS 2 — Focus edges (connected to hovered/pinned node)
+  // ═══════════════════════════════
+  if (hasFocus) {
+    edges.forEach(e => {
+      const p1=nodePos[e.from],p2=nodePos[e.to]; if(!p1||!p2)return;
+      if (!focusEdgeKeys.has(e.from+'||'+e.to)) return;
+
+      const fp = e.from===focusNode ? p1 : p2;  // focus node end
+      const np = e.from===focusNode ? p2 : p1;  // neighbor end
+
+      // Animated glow
+      ctx.save();
+      ctx.shadowColor='#00e5ff'; ctx.shadowBlur=10+5*pulse;
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+      ctx.strokeStyle=rgba('#00e5ff', 0.55+0.25*pulse);
+      ctx.lineWidth=2; ctx.stroke();
+      ctx.restore();
+
+      // Directional arrow (focus → neighbor)
+      ctx.fillStyle=rgba('#00e5ff',0.75+0.15*pulse);
+      arrow(fp.x,fp.y,np.x,np.y);
+
+      // All-metric labels, full brightness
+      edgeLabels(p1,p2,e, 0.9+0.1*pulse, true);
+    });
+  }
+
+  // ═══════════════════════════════
+  // PASS 3 — Active path edges
+  // ═══════════════════════════════
+  const drawnPairs = new Set();
+  for (let i=0;i<displayPath.length-1;i++) {
+    const a=displayPath[i],b=displayPath[i+1];
+    const p1=nodePos[a],p2=nodePos[b]; if(!p1||!p2)continue;
+
+    // Skip if already drawn by focus pass
+    const ek1=a+'||'+b, ek2=b+'||'+a;
+    if (hasFocus && (focusEdgeKeys.has(ek1)||focusEdgeKeys.has(ek2))) continue;
+
+    const dimmed = hasFocus && a!==focusNode && b!==focusNode;
+    const alpha  = dimmed ? 0.28 : 1.0;
+
+    ctx.save();
+    if(!dimmed){ ctx.shadowColor=color; ctx.shadowBlur=10; }
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y);
+    ctx.strokeStyle=rgba(color,alpha); ctx.lineWidth=dimmed?1.2:2.5; ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle=rgba(color,alpha);
+    arrow(p1.x,p1.y,p2.x,p2.y);
+
+    const pk=[a,b].sort().join('-');
+    if(!drawnPairs.has(pk)) {
+      drawnPairs.add(pk);
+      const ed=edges.find(e=>(e.from===a&&e.to===b)||(e.from===b&&e.to===a));
+      if(ed) edgeLabels(p1,p2,ed,dimmed?0.3:1.0,!dimmed);
+    }
+  }
+
+  // ═══════════════════════════════
+  // PASS 4 — Nodes
+  // ═══════════════════════════════
+  [...nodes].sort().forEach(n => {
+    const p=nodePos[n]; if(!p)return;
+    const {x,y}=p;
+
+    const isStart    = currentPathData && n===currentPathData.from;
+    const isEnd      = currentPathData && n===currentPathData.to;
+    const isOnPath   = pathNodes.has(n);
+    const isFocus    = n===focusNode;
+    const isNeighbor = focusNeighbors.has(n);
+    const isHover    = n===hoveredNode;
+    const isPinned   = n===pinnedNode;
+
+    // Dim nodes unrelated to focus
+    let nodeAlpha = 1.0;
+    if (hasFocus && !isFocus && !isNeighbor) nodeAlpha = 0.15;
+
+    const extraR = isFocus ? 4 : isNeighbor ? 2 : (isHover||isPinned) ? 3 : 0;
+    const baseR  = isStart||isEnd ? 16 : isOnPath ? 14 : 11;
+    const R = baseR + extraR;
+
+    let fill, stroke, textC;
+    if      (isStart)    { fill='#ffd166';              stroke='#ffd166'; textC='#000'; }
+    else if (isEnd)      { fill=rgba(color,0.22);       stroke=color;     textC='#fff'; }
+    else if (isFocus)    { fill='rgba(0,229,255,0.2)';  stroke='#00e5ff'; textC='#00e5ff'; }
+    else if (isNeighbor) { fill='rgba(0,229,255,0.1)';  stroke=rgba('#00e5ff',0.55); textC=rgba('#00e5ff',0.9); }
+    else if (isOnPath)   { fill=rgba(color,0.16);       stroke=rgba(color,0.65); textC='#fff'; }
+    else                 { fill='#141920';              stroke='#2a3a4a'; textC='#8899aa'; }
+
+    ctx.save();
+    ctx.globalAlpha = nodeAlpha;
+
+    // ── Outer glow rings ──
+    if (isFocus) {
+      // Animated pulsing ring
+      const glowR = R + 10 + 5*pulse;
+      const g = ctx.createRadialGradient(x,y,R,x,y,glowR);
+      g.addColorStop(0, `rgba(0,229,255,${0.35+0.2*pulse})`);
+      g.addColorStop(1, 'transparent');
+      ctx.beginPath(); ctx.arc(x,y,glowR,0,Math.PI*2);
+      ctx.fillStyle=g; ctx.fill();
+
+      // Dashed outer ring
+      ctx.beginPath(); ctx.arc(x,y,R+8,0,Math.PI*2);
+      ctx.strokeStyle=rgba('#00e5ff',0.4+0.2*pulse);
+      ctx.lineWidth=1; ctx.setLineDash([5,4]); ctx.stroke(); ctx.setLineDash([]);
+    }
+    if (isStart) {
+      const g=ctx.createRadialGradient(x,y,0,x,y,30);
+      g.addColorStop(0,'rgba(255,209,102,0.3)'); g.addColorStop(1,'transparent');
+      ctx.beginPath(); ctx.arc(x,y,30,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    }
+    if (isEnd && !isFocus) {
+      const g=ctx.createRadialGradient(x,y,0,x,y,24);
+      g.addColorStop(0,rgba(color,'0.22')); g.addColorStop(1,'transparent');
+      ctx.beginPath(); ctx.arc(x,y,24,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    }
+    if (isNeighbor && !isFocus) {
+      // Soft halo for neighbors
+      const g=ctx.createRadialGradient(x,y,R-2,x,y,R+10);
+      g.addColorStop(0,`rgba(0,229,255,${0.18+0.08*pulse})`);
+      g.addColorStop(1,'transparent');
+      ctx.beginPath(); ctx.arc(x,y,R+10,0,Math.PI*2);
+      ctx.fillStyle=g; ctx.fill();
+    }
+    if (isPinned) {
+      // Gold dashed ring to show pinned state
+      ctx.beginPath(); ctx.arc(x,y,R+9,0,Math.PI*2);
+      ctx.strokeStyle=rgba('#ffd166',0.5+0.25*pulse);
+      ctx.lineWidth=1.5; ctx.setLineDash([4,3]); ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    // ── Main circle ──
+    ctx.beginPath(); ctx.arc(x,y,R,0,Math.PI*2);
+    ctx.fillStyle=fill; ctx.fill();
+    ctx.strokeStyle=stroke;
+    ctx.lineWidth = (isFocus||isStart||isEnd) ? 2.2 : (isNeighbor||isOnPath) ? 1.5 : 1;
+    if(isFocus||isHover){ ctx.shadowColor='#00e5ff'; ctx.shadowBlur=14; }
+    ctx.stroke(); ctx.shadowBlur=0;
+
+    // ── Node label ──
+    const bold = isStart||isEnd||isFocus||isNeighbor||isOnPath;
+    ctx.font=`${bold?'bold ':''}${11+extraR*0.4}px Barlow,sans-serif`;
+    ctx.fillStyle=textC; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(n,x,y);
+
+    // ── Tag below node ──
+    const tagY = y+R+5;
+    ctx.font='bold 8px Share Tech Mono,monospace';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    if      (isStart)  { ctx.fillStyle='#ffd166bb'; ctx.fillText('START',x,tagY); }
+    else if (isEnd)    { ctx.fillStyle=color+'bb';  ctx.fillText('END',  x,tagY); }
+    else if (isPinned) { ctx.fillStyle='#ffd166aa'; ctx.fillText('📌 PINNED',x,tagY); }
+
+    ctx.restore();
+  });
+
+  // ═══════════════════════════════
+  // PASS 5 — Legend
+  // ═══════════════════════════════
+  const items = [
+    { c:'#ffd166', shape:'dot',  l: currentPathData?`Start (Node ${currentPathData.from})`:'Start Node' },
+    { c:color,     shape:'dot',  l: currentPathData?`End (Node ${currentPathData.to})`  :'End Node'   },
+    { c:color,     shape:'line', l: `${metric[0].toUpperCase()+metric.slice(1)}-optimal path` },
+    { c:'#00e5ff', shape:'ring', l: 'Hover/click node — see connections'                       },
+  ];
+  items.forEach(({c,shape,l},i) => {
+    const ly = H - 14 - i*20;
+    if(shape==='dot') {
+      ctx.beginPath(); ctx.arc(14,ly,5,0,Math.PI*2); ctx.fillStyle=c; ctx.fill();
+    } else if(shape==='line') {
+      ctx.beginPath(); ctx.moveTo(6,ly); ctx.lineTo(22,ly);
+      ctx.strokeStyle=c+'aa'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle=c+'aa'; arrow(6,ly,22,ly);
+    } else {
+      ctx.beginPath(); ctx.arc(14,ly,5,0,Math.PI*2);
+      ctx.strokeStyle=c+'aa'; ctx.lineWidth=1.5; ctx.stroke();
+    }
+    ctx.font='11px Barlow,sans-serif'; ctx.fillStyle='#c8d8e8bb';
+    ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(l,30,ly);
+  });
+}
+</script>
+</body>
+</html>
