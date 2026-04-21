@@ -7,8 +7,8 @@
 [![Repository](https://img.shields.io/badge/Repository-GitHub-black?style=for-the-badge\&logo=github)](https://github.com/LeinadClark/DAALab-AY225-DELACRUZ)
 
 ## **DAALab-AY225 Final Project | Group 16**  
-![Team Work](https://img.shields.io/badge/Team-2%20Developers-yellow?style=for-the-badge)
-**DELA CRUZ, LEINAD CLARK M.**  ![Contributor](https://img.shields.io/badge/LeinadClark-Repo%20Owner,%20lead%20developer%20&%20%20bug%20fixing-blue?style=for-the-badge)
+![Team Work](https://img.shields.io/badge/Team-2%20Developers-yellow?style=for-the-badge)   
+**DELA CRUZ, LEINAD CLARK M.**  ![Contributor](https://img.shields.io/badge/LeinadClark-Repo%20Owner,%20lead%20developer%20&%20%20bug%20fixing-blue?style=for-the-badge)    
 **PARANE, JOCELYN B.**
 ![Contributor](https://img.shields.io/badge/JocelynBaylon-collaborator,%20UI%2FUX%20%26%20Data%20Design-pink?style=for-the-badge)
 
@@ -199,4 +199,3 @@ It reflects real-world development practices, including shared version control, 
 * Manual review before final integration
 
 ---
-g
