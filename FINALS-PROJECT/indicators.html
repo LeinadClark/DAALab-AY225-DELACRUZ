@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indicators — International Debt Statistics</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Source+Sans+3:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Special+Elite&family=Courier+Prime:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <span class="dot"></span>
+    IDS Dashboard
+  </div>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="categories.html">Categories</a>
+    <a href="dataset.html">Dataset</a>
+    <a class="active" href="indicators.html">Indicators</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="nav-badge">World Bank</span>
+    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle theme">
+      <span class="toggle-track">
+        <span class="toggle-thumb"></span>
+        <span class="toggle-icon moon">🌙</span>
+        <span class="toggle-icon sun">☀️</span>
+      </span>
+    </button>
+  </div>
+</nav>
+
+<main style="padding-top:2rem;">
+  <section>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Key Indicators Reference</h2>
+      <p>Most commonly used IDS indicators</p>
+    </div>
+    <div class="ind-grid">
+      <div class="ind-card">
+        <span class="ind-num">DT.DOD.DECT.CD</span>
+        <div class="ind-content">
+          <h4>External debt stocks, total</h4>
+          <p>Total outstanding external debt at year-end. Includes long-term public, private, and short-term debt plus IMF credit. Unit: current USD.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.DIS.DECT.CD</span>
+        <div class="ind-content">
+          <h4>Disbursements on external debt, total</h4>
+          <p>New external debt borrowed during the year. Includes PPG long-term, PNG long-term disbursements. Unit: current USD.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.AMT.DECT.CD</span>
+        <div class="ind-content">
+          <h4>Principal repayments on external debt</h4>
+          <p>Principal payments made on long-term external debt during the year. Excludes short-term and IMF repayments. Unit: current USD.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.INT.DECT.CD</span>
+        <div class="ind-content">
+          <h4>Interest payments on external debt</h4>
+          <p>Interest paid on all external debt during the year. Covers both long-term and short-term instruments. Unit: current USD.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.TDS.DECT.GN.ZS</span>
+        <div class="ind-content">
+          <h4>Debt service (% of GNI)</h4>
+          <p>Total debt service (principal + interest) as a percentage of gross national income. Key sustainability ratio used by IMF/World Bank DSA frameworks.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.TDS.DECT.EX.ZS</span>
+        <div class="ind-content">
+          <h4>Debt service (% of exports)</h4>
+          <p>Total debt service as a percentage of goods, services, and primary income exports. Critical liquidity indicator — above 20% signals stress.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.DOD.DECT.GN.ZS</span>
+        <div class="ind-content">
+          <h4>External debt stocks (% of GNI)</h4>
+          <p>Total external debt stock as a share of gross national income. IMF sustainability benchmark: above 150% for low-income countries indicates high risk.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.DOD.MWBG.CD</span>
+        <div class="ind-content">
+          <h4>PPG multilateral World Bank debt</h4>
+          <p>Outstanding public & publicly guaranteed debt owed specifically to the World Bank Group (IBRD + IDA). Unit: current USD.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.DOD.BLAT.CD</span>
+        <div class="ind-content">
+          <h4>PPG bilateral debt stocks</h4>
+          <p>Public debt owed to official bilateral creditors (governments) such as Paris Club members, China's Export-Import Bank, and other sovereign lenders.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.DOD.BONS.CD</span>
+        <div class="ind-content">
+          <h4>PPG bonds</h4>
+          <p>Public debt issued as bonds on international capital markets. Includes Eurobonds and other traded fixed-income instruments issued by sovereigns.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.DOD.PRVS.CD</span>
+        <div class="ind-content">
+          <h4>Private nonguaranteed debt</h4>
+          <p>External debt owed by the private sector without government guarantee. Includes corporate bonds, bank loans, and other private borrowings from abroad.</p>
+        </div>
+      </div>
+      <div class="ind-card">
+        <span class="ind-num">DT.DOD.DSTC.CD</span>
+        <div class="ind-content">
+          <h4>Short-term external debt</h4>
+          <p>External debt with original maturity of one year or less. High short-term debt relative to reserves is a key early-warning indicator of balance of payments crises.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Methodology Notes</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+      <div class="cat-card blue" style="padding:1.25rem;">
+        <h3 style="font-size:14px;margin-bottom:8px;">DRS Reporting Status</h3>
+        <p style="font-size:12px;margin-bottom:0.75rem;">Countries are classified as (A) As Reported, (P) Preliminary, or (E) Estimated. "Estimated" data involves significant World Bank staff estimation due to incomplete country reporting.</p>
+      </div>
+      <div class="cat-card gold" style="padding:1.25rem;">
+        <h3 style="font-size:14px;margin-bottom:8px;">Currency & Valuation</h3>
+        <p style="font-size:12px;margin-bottom:0.75rem;">All data reported in current USD. Cross-currency debt is converted using end-of-year exchange rates. SDR-denominated IMF credit uses IMF official SDR/USD exchange rates.</p>
+      </div>
+      <div class="cat-card teal" style="padding:1.25rem;">
+        <h3 style="font-size:14px;margin-bottom:8px;">HIPC & Debt Relief</h3>
+        <p style="font-size:12px;margin-bottom:0.75rem;">Data includes the effects of HIPC (Heavily Indebted Poor Countries) and MDRI (Multilateral Debt Relief Initiative) debt relief. Pre-relief figures available in notes.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Data sourced from the <a href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics" target="_blank">World Bank International Debt Statistics</a> dataset on Kaggle
+  and the <a href="https://data.worldbank.org" target="_blank">World Bank Open Data API</a>.
+  Dashboard built for educational and analytical purposes.
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

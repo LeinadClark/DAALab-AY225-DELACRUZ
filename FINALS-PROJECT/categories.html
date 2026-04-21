@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Categories — International Debt Statistics</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Source+Sans+3:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Special+Elite&family=Courier+Prime:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <span class="dot"></span>
+    IDS Dashboard
+  </div>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a class="active" href="categories.html">Categories</a>
+    <a href="dataset.html">Dataset</a>
+    <a href="indicators.html">Indicators</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="nav-badge">World Bank</span>
+    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle theme">
+      <span class="toggle-track">
+        <span class="toggle-thumb"></span>
+        <span class="toggle-icon moon">🌙</span>
+        <span class="toggle-icon sun">☀️</span>
+      </span>
+    </button>
+  </div>
+</nav>
+
+<main style="padding-top:2rem;">
+  <section>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Data Categories & Pages</h2>
+      <p>6 major indicator groups</p>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card blue">
+        <div class="cat-icon blue">🏛️</div>
+        <h3>External Debt Stocks</h3>
+        <p>Total outstanding debt owed to foreign creditors at year-end. Covers long-term public & publicly guaranteed (PPG), private non-guaranteed (PNG), short-term debt, and IMF credit. The foundational measure of a country's debt burden.</p>
+        <div class="cat-tags">
+          <span class="tag">DT.DOD.DECT.CD</span>
+          <span class="tag">PPG</span>
+          <span class="tag">PNG</span>
+          <span class="tag">Short-term</span>
+        </div>
+      </div>
+      <div class="cat-card gold">
+        <div class="cat-icon gold">💸</div>
+        <h3>Debt Flows & Disbursements</h3>
+        <p>Tracks new borrowing (disbursements) and repayments (principal + interest) each year. Allows analysis of net flows — whether a country is a net receiver or net payer of debt financing. Key for understanding debt sustainability.</p>
+        <div class="cat-tags">
+          <span class="tag">DT.DIS.DECT.CD</span>
+          <span class="tag">DT.AMT.DECT.CD</span>
+          <span class="tag">DT.INT.DECT.CD</span>
+        </div>
+      </div>
+      <div class="cat-card teal">
+        <div class="cat-icon teal">📊</div>
+        <h3>Debt Ratios & Key Indicators</h3>
+        <p>Analytical ratios used to assess debt sustainability: Debt-to-GNI, Debt Service-to-Exports, Interest-to-Exports, Short-term Debt as % of reserves. These ratios are featured prominently in the International Debt Report (IDR) publication.</p>
+        <div class="cat-tags">
+          <span class="tag">Debt/GNI %</span>
+          <span class="tag">DS/Exports %</span>
+          <span class="tag">Reserves</span>
+        </div>
+      </div>
+      <div class="cat-card rose">
+        <div class="cat-icon rose">🌐</div>
+        <h3>Creditor Composition</h3>
+        <p>Breakdown of who holds a country's debt — multilateral institutions (World Bank, IMF, regional development banks), bilateral creditors (G7, Paris Club, China), private bondholders, and commercial banks. Critical for restructuring analysis.</p>
+        <div class="cat-tags">
+          <span class="tag">Multilateral</span>
+          <span class="tag">Bilateral</span>
+          <span class="tag">Bondholders</span>
+          <span class="tag">Commercial</span>
+        </div>
+      </div>
+      <div class="cat-card green">
+        <div class="cat-icon green">📅</div>
+        <h3>Debt Service Projections</h3>
+        <p>Future scheduled principal and interest payments. Shows upcoming debt service obligations for each country — essential for assessing liquidity risk and near-term financing needs. Also includes DSSI (Debt Service Suspension Initiative) data.</p>
+        <div class="cat-tags">
+          <span class="tag">Future payments</span>
+          <span class="tag">DSSI</span>
+          <span class="tag">Liquidity risk</span>
+        </div>
+      </div>
+      <div class="cat-card purple">
+        <div class="cat-icon purple">🏷️</div>
+        <h3>Country & Income Metadata</h3>
+        <p>Country classification by income group (low, lower-middle, upper-middle), regional grouping, and DRS reporting status (A=as reported, P=preliminary, E=estimated). Enables comparative regional and income-group analysis.</p>
+        <div class="cat-tags">
+          <span class="tag">ISO codes</span>
+          <span class="tag">Income groups</span>
+          <span class="tag">Regions</span>
+          <span class="tag">DRS status</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Dataset Files on Kaggle</h2>
+      <p>Login required &middot; Free account</p>
+    </div>
+
+    <div class="dl-notice">
+      <div class="dl-notice-icon">&#128273;</div>
+      <div>
+        <strong>Kaggle account required to download.</strong>
+        Files are free &mdash; you just need to <a href="https://www.kaggle.com/account/login" target="_blank" rel="noopener">sign in or register</a> first.
+        Once logged in, click any file card or use the Download All button to get the full ZIP.
+      </div>
+      <a class="dl-all-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics/download?datasetVersionNumber=2" target="_blank" rel="noopener">&#11015; Download All (ZIP)</a>
+    </div>
+
+    <div class="dl-grid">
+      <div class="dl-card">
+        <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~150 MB</span></div>
+        <h4>international_debt.csv</h4>
+        <p>Core dataset &mdash; country, indicator code, name, and annual values from 1970&ndash;present. Wide format with year columns.</p>
+        <div class="dl-meta"><span>&#11088; Primary file</span><span>1,400+ indicators</span></div>
+        <a class="dl-btn primary" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=international_debt.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
+      </div>
+      <div class="dl-card">
+        <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~2 MB</span></div>
+        <h4>country.csv</h4>
+        <p>Country reference table with ISO codes, long names, income group, region, and lending category (IDA, IBRD, Blend).</p>
+        <div class="dl-meta"><span>Reference</span><span>125+ countries</span></div>
+        <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=country.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
+      </div>
+      <div class="dl-card">
+        <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~3 MB</span></div>
+        <h4>series.csv</h4>
+        <p>Indicator metadata with full names, definitions, units, periodicity, and source organization for every series.</p>
+        <div class="dl-meta"><span>Reference</span><span>Indicator definitions</span></div>
+        <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=series.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
+      </div>
+      <div class="dl-card">
+        <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~5 MB</span></div>
+        <h4>country_series.csv</h4>
+        <p>Metadata linking country codes to indicator codes, with footnotes and special notes for individual data points.</p>
+        <div class="dl-meta"><span>Metadata</span><span>Point-level notes</span></div>
+        <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=country_series.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
+      </div>
+      <div class="dl-card">
+        <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~8 MB</span></div>
+        <h4>footnotes.csv</h4>
+        <p>Country-indicator-year specific notes explaining methodology differences, estimation methods, or data limitations.</p>
+        <div class="dl-meta"><span>Metadata</span><span>Methodology notes</span></div>
+        <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=footnotes.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
+      </div>
+      <div class="dl-card">
+        <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~1 MB</span></div>
+        <h4>series_time.csv</h4>
+        <p>Time-series metadata with coverage period notes, methodology changes, and data availability flags by year.</p>
+        <div class="dl-meta"><span>Metadata</span><span>Temporal coverage</span></div>
+        <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=series_time.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
+      </div>
+    </div>
+
+    <div class="api-tip">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="font-size:16px;">&#9889;</span>
+        <strong style="font-size:14px;">Download via Kaggle API (faster for developers)</strong>
+      </div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:10px;">Install the Kaggle CLI and run this command to download all files at once:</p>
+      <div class="code-block">kaggle datasets download -d theworldbank/international-debt-statistics --unzip</div>
+      <p style="font-size:12px;color:var(--text3);margin-top:8px;">Requires <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg3);padding:2px 6px;border-radius:3px;">pip install kaggle</code> and a <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg3);padding:2px 6px;border-radius:3px;">kaggle.json</code> API token from your Kaggle account settings.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Data sourced from the <a href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics" target="_blank">World Bank International Debt Statistics</a> dataset on Kaggle
+  and the <a href="https://data.worldbank.org" target="_blank">World Bank Open Data API</a>.
+  Dashboard built for educational and analytical purposes.
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>
