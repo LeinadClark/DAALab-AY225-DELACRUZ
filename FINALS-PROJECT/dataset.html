@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dataset — International Debt Statistics</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Source+Sans+3:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Special+Elite&family=Courier+Prime:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <span class="dot"></span>
+    IDS Dashboard
+  </div>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="categories.html">Categories</a>
+    <a class="active" href="dataset.html">Dataset</a>
+    <a href="indicators.html">Indicators</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="nav-badge">World Bank</span>
+    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle theme">
+      <span class="toggle-track">
+        <span class="toggle-thumb"></span>
+        <span class="toggle-icon moon">🌙</span>
+        <span class="toggle-icon sun">☀️</span>
+      </span>
+    </button>
+  </div>
+</nav>
+
+<main style="padding-top:2rem;">
+  <section>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Live Dataset — World Bank API</h2>
+    </div>
+
+    <div class="live-bar">
+      <span class="live-dot"></span>
+      <strong>Live data</strong> — fetching from the World Bank Open Data API &nbsp;·&nbsp;
+      <span id="api-status">Ready to load</span>
+    </div>
+
+    <div class="table-controls">
+      <input type="text" id="search-input" placeholder="Search country or indicator..." oninput="filterTable()">
+      <select id="region-filter" onchange="filterTable()">
+        <option value="">All regions</option>
+        <option value="East Asia">East Asia & Pacific</option>
+        <option value="South Asia">South Asia</option>
+        <option value="Sub-Saharan">Sub-Saharan Africa</option>
+        <option value="Latin">Latin America & Caribbean</option>
+        <option value="Europe">Europe & Central Asia</option>
+        <option value="Middle East">Middle East & N. Africa</option>
+      </select>
+      <button class="load-btn" id="load-btn" onclick="loadData()">Load dataset ↗</button>
+    </div>
+
+    <div class="tbl-wrap">
+      <div class="tbl-inner">
+        <table id="data-table">
+          <thead>
+            <tr>
+              <th>Country</th>
+              <th>Country Code</th>
+              <th>Indicator</th>
+              <th>Year</th>
+              <th>Value (USD)</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr class="loading-row">
+              <td colspan="5" style="text-align:center;padding:2rem;color:var(--text3);">
+                Click "Load dataset" to fetch live data from the World Bank API
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tbl-footer">
+        <span id="row-count">—</span>
+        <span>Source: World Bank Open Data API · IDS database · indicator DT.DOD.DECT.CD</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Top Debtors — Loaded Data</h2>
+      <p>Ranked by total external debt (current USD)</p>
+    </div>
+    <div class="chart-card">
+      <h3>Highest external debt countries (most recent year)</h3>
+      <p>Total external debt stocks (DT.DOD.DECT.CD) — current USD billions</p>
+      <div class="chart-wrap" style="height:340px;">
+        <canvas id="topDebtorsChart" role="img" aria-label="Horizontal bar chart of top debtor countries by external debt.">Top debtor countries will appear after loading data.</canvas>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Data sourced from the <a href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics" target="_blank">World Bank International Debt Statistics</a> dataset on Kaggle
+  and the <a href="https://data.worldbank.org" target="_blank">World Bank Open Data API</a>.
+  Dashboard built for educational and analytical purposes.
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>
