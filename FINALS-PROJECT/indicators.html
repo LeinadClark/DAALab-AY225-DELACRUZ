@@ -156,5 +156,11 @@
 </footer>
 
 <script src="js/script.js"></script>
+<script>
+  // Prevents the flash of wrong theme on page load
+  if (localStorage.getItem('ids-theme') === 'light') {
+    document.documentElement.classList.add('light');
+  }
+</script>
 </body>
 </html>

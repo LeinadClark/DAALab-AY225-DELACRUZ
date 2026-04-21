@@ -1,7 +1,18 @@
+// ── 1. THEME INITIALIZATION (Must run FIRST) ──────────────────────────
+// Check localStorage immediately so the DOM and charts know the correct theme before rendering.
+(function() {
+  const saved = localStorage.getItem('ids-theme');
+  if (saved === 'light') {
+    document.documentElement.classList.add('light');
+  } else {
+    document.documentElement.classList.remove('light');
+  }
+})();
+
 let allRows = [];
 let topDebtorsChart = null;
 
-// ── CHARTS (static/illustrative) ──────────────────────────────────────
+// ── 2. CHARTS (static/illustrative) ───────────────────────────────────
 function CHART_TEXT() {
   return document.documentElement.classList.contains('light') ? '#4a3c28' : '#8b9ab5';
 }
@@ -84,7 +95,7 @@ new Chart(document.getElementById('trendChart'), {
   }
 });
 
-// ── LIVE DATA LOADING ──────────────────────────────────────────────────
+// ── 3. LIVE DATA LOADING ──────────────────────────────────────────────────
 async function loadData() {
   const btn = document.getElementById('load-btn');
   const status = document.getElementById('api-status');
@@ -201,7 +212,7 @@ function renderTopDebtors(rows) {
   });
 }
 
-// ── THEME TOGGLE ──────────────────────────────────────────────────────
+// ── 4. THEME TOGGLE FUNCTION ──────────────────────────────────────────
 function toggleTheme() {
   const isLight = document.documentElement.classList.toggle('light');
   localStorage.setItem('ids-theme', isLight ? 'light' : 'dark');
@@ -225,12 +236,14 @@ function updateChartTheme(isLight) {
         }
       });
     }
+    // Update top debtors chart bars if it exists
+    if (chart.canvas.id === 'topDebtorsChart') {
+      chart.data.datasets[0].backgroundColor = chart.data.labels.map((_, i) => {
+        if (i === 0) return isLight ? '#b8860b' : '#f59e0b';
+        if (i < 3)  return isLight ? '#8b4513' : '#3b82f6';
+        return isLight ? '#c8b89a' : '#1e3a5f';
+      });
+    }
     chart.update('none');
   });
 }
-
-// Restore saved preference on load
-(function() {
-  const saved = localStorage.getItem('ids-theme');
-  if (saved === 'light') document.documentElement.classList.add('light');
-})();
