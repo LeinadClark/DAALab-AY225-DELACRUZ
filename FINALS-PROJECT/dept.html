@@ -461,7 +461,146 @@
   /* API FETCH STATUS */
   #api-status { font-size: 12px; color: var(--text3); font-family: var(--font-mono); }
 
+  /* DOWNLOAD COMPONENTS */
+  .dl-notice {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(245,158,11,0.07);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .dl-notice-icon { font-size: 20px; flex-shrink: 0; }
+  .dl-notice a { color: var(--accent2); text-decoration: underline; }
+  .dl-notice strong { color: var(--text); }
+  .dl-all-btn {
+    margin-left: auto;
+    background: var(--gold);
+    color: #000;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+  .dl-all-btn:hover { opacity: 0.85; }
+
+  .dl-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 1.25rem;
+  }
+  .dl-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .dl-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .dl-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .dl-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    background: rgba(59,130,246,0.15);
+    color: var(--accent2);
+    border: 1px solid rgba(59,130,246,0.25);
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .dl-size {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .dl-card h4 {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .dl-card p {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .dl-meta {
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+  .dl-meta span {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .dl-btn {
+    display: block;
+    text-align: center;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+  .dl-btn:hover { background: var(--card2); color: var(--text); border-color: var(--accent); }
+  .dl-btn.primary {
+    background: rgba(59,130,246,0.12);
+    border-color: rgba(59,130,246,0.35);
+    color: var(--accent2);
+  }
+  .dl-btn.primary:hover { background: rgba(59,130,246,0.22); }
+
+  .api-tip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+  }
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--teal);
+    letter-spacing: 0.02em;
+    overflow-x: auto;
+  }
+
   @media (max-width: 900px) {
+    .dl-grid { grid-template-columns: 1fr 1fr; }
+    .dl-notice { flex-direction: column; align-items: flex-start; }
+    .dl-all-btn { margin-left: 0; width: 100%; text-align: center; }
     .cat-grid { grid-template-columns: 1fr 1fr; }
     .charts-row, .ind-grid { grid-template-columns: 1fr; }
     .hero-stats { grid-template-columns: 1fr 1fr; }
@@ -666,50 +805,72 @@
       <div class="section-header">
         <span class="section-num">02</span>
         <h2>Dataset Files on Kaggle</h2>
+        <p>Login required &middot; Free account</p>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-        <div class="ind-card">
-          <span class="ind-num">CSV</span>
-          <div class="ind-content">
-            <h4>international_debt.csv</h4>
-            <p>Core dataset with country, indicator code, indicator name, and annual values from 1970–present. Wide format with year columns.</p>
-          </div>
+
+      <div class="dl-notice">
+        <div class="dl-notice-icon">&#128273;</div>
+        <div>
+          <strong>Kaggle account required to download.</strong>
+          Files are free &mdash; you just need to <a href="https://www.kaggle.com/account/login" target="_blank" rel="noopener">sign in or register</a> first.
+          Once logged in, click any file card or use the Download All button to get the full ZIP.
         </div>
-        <div class="ind-card">
-          <span class="ind-num">CSV</span>
-          <div class="ind-content">
-            <h4>country_series.csv</h4>
-            <p>Metadata linking country codes to indicator codes, with footnotes and special notes for individual data points.</p>
-          </div>
+        <a class="dl-all-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics/download?datasetVersionNumber=2" target="_blank" rel="noopener">&#11015; Download All (ZIP)</a>
+      </div>
+
+      <div class="dl-grid">
+        <div class="dl-card">
+          <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~150 MB</span></div>
+          <h4>international_debt.csv</h4>
+          <p>Core dataset &mdash; country, indicator code, name, and annual values from 1970&ndash;present. Wide format with year columns.</p>
+          <div class="dl-meta"><span>&#11088; Primary file</span><span>1,400+ indicators</span></div>
+          <a class="dl-btn primary" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=international_debt.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
         </div>
-        <div class="ind-card">
-          <span class="ind-num">CSV</span>
-          <div class="ind-content">
-            <h4>country.csv</h4>
-            <p>Country reference table with ISO codes, long names, income group, region, and lending category (IDA, IBRD, Blend).</p>
-          </div>
+        <div class="dl-card">
+          <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~2 MB</span></div>
+          <h4>country.csv</h4>
+          <p>Country reference table with ISO codes, long names, income group, region, and lending category (IDA, IBRD, Blend).</p>
+          <div class="dl-meta"><span>Reference</span><span>125+ countries</span></div>
+          <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=country.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
         </div>
-        <div class="ind-card">
-          <span class="ind-num">CSV</span>
-          <div class="ind-content">
-            <h4>series.csv</h4>
-            <p>Series/indicator metadata with full indicator names, definitions, units, periodicity, and source organization.</p>
-          </div>
+        <div class="dl-card">
+          <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~3 MB</span></div>
+          <h4>series.csv</h4>
+          <p>Indicator metadata with full names, definitions, units, periodicity, and source organization for every series.</p>
+          <div class="dl-meta"><span>Reference</span><span>Indicator definitions</span></div>
+          <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=series.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
         </div>
-        <div class="ind-card">
-          <span class="ind-num">CSV</span>
-          <div class="ind-content">
-            <h4>footnotes.csv</h4>
-            <p>Country-indicator-year specific notes explaining methodology differences, estimation methods, or data limitations.</p>
-          </div>
+        <div class="dl-card">
+          <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~5 MB</span></div>
+          <h4>country_series.csv</h4>
+          <p>Metadata linking country codes to indicator codes, with footnotes and special notes for individual data points.</p>
+          <div class="dl-meta"><span>Metadata</span><span>Point-level notes</span></div>
+          <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=country_series.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
         </div>
-        <div class="ind-card">
-          <span class="ind-num">CSV</span>
-          <div class="ind-content">
-            <h4>series_time.csv</h4>
-            <p>Time-series metadata with coverage period notes, methodology changes over time, and data availability flags by year.</p>
-          </div>
+        <div class="dl-card">
+          <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~8 MB</span></div>
+          <h4>footnotes.csv</h4>
+          <p>Country-indicator-year specific notes explaining methodology differences, estimation methods, or data limitations.</p>
+          <div class="dl-meta"><span>Metadata</span><span>Methodology notes</span></div>
+          <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=footnotes.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
         </div>
+        <div class="dl-card">
+          <div class="dl-card-top"><span class="dl-badge">CSV</span><span class="dl-size">~1 MB</span></div>
+          <h4>series_time.csv</h4>
+          <p>Time-series metadata with coverage period notes, methodology changes, and data availability flags by year.</p>
+          <div class="dl-meta"><span>Metadata</span><span>Temporal coverage</span></div>
+          <a class="dl-btn" href="https://www.kaggle.com/datasets/theworldbank/international-debt-statistics?select=series_time.csv" target="_blank" rel="noopener">Open on Kaggle &#8599;</a>
+        </div>
+      </div>
+
+      <div class="api-tip">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span style="font-size:16px;">&#9889;</span>
+          <strong style="font-size:14px;">Download via Kaggle API (faster for developers)</strong>
+        </div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:10px;">Install the Kaggle CLI and run this command to download all files at once:</p>
+        <div class="code-block">kaggle datasets download -d theworldbank/international-debt-statistics --unzip</div>
+        <p style="font-size:12px;color:var(--text3);margin-top:8px;">Requires <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg3);padding:2px 6px;border-radius:3px;">pip install kaggle</code> and a <code style="font-family:var(--font-mono);font-size:11px;background:var(--bg3);padding:2px 6px;border-radius:3px;">kaggle.json</code> API token from your Kaggle account settings.</p>
       </div>
     </section>
   </main>
