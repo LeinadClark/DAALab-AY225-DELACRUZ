@@ -7,6 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Source+Sans+3:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Special+Elite&family=Courier+Prime:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
+<script>
+  if (localStorage.getItem('ids-theme') === 'light') {
+    document.documentElement.classList.add('light');
+  }
+</script>
 <body>
 
 <nav>
@@ -187,11 +192,5 @@
 </footer>
 
 <script src="js/script.js"></script>
-<script>
-  // Prevents the flash of wrong theme on page load
-  if (localStorage.getItem('ids-theme') === 'light') {
-    document.documentElement.classList.add('light');
-  }
-</script>
 </body>
 </html>

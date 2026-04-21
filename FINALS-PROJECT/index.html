@@ -7,6 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Source+Sans+3:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Special+Elite&family=Courier+Prime:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="stylesheet" href="css/styles.css">
+<script>
+  if (localStorage.getItem('ids-theme') === 'light') {
+    document.documentElement.classList.add('light');
+  }
+</script>
 </head>
 <body>
 
@@ -64,13 +69,13 @@
 </div>
 
 <main>
-  <section>
+  <section class="reveal">
     <div class="section-header">
       <span class="section-num">01</span>
       <h2>About the Dataset</h2>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div class="cat-card blue">
+      <div class="cat-card blue reveal">
         <div class="cat-icon blue">📋</div>
         <h3>Source & Publisher</h3>
         <p>Published by the World Bank via the Debtor Reporting System (DRS). Countries that borrow from the World Bank or IMF are required to report their public and publicly-guaranteed external debt annually.</p>
@@ -80,7 +85,7 @@
           <span class="tag">Annual</span>
         </div>
       </div>
-      <div class="cat-card teal">
+      <div class="cat-card teal reveal">
         <div class="cat-icon teal">🗂️</div>
         <h3>Coverage & Scope</h3>
         <p>Covers long-term public & publicly guaranteed debt, private non-guaranteed debt, and short-term debt. Includes debt stocks (balance), flows (disbursements & repayments), and ratios (debt/GNI, debt service/exports).</p>
@@ -93,21 +98,21 @@
     </div>
   </section>
 
-  <section>
+  <section class="reveal">
     <div class="section-header">
       <span class="section-num">02</span>
       <h2>Regional Debt Overview</h2>
       <p>External debt stocks by region (USD billions)</p>
     </div>
     <div class="charts-row">
-      <div class="chart-card">
+      <div class="chart-card reveal">
         <h3>External debt by region (2021)</h3>
         <p>Long-term external debt stocks in USD billions</p>
         <div class="chart-wrap" style="height:260px;">
           <canvas id="regionChart" role="img" aria-label="Bar chart showing external debt by region. East Asia Pacific leads with over 3 trillion USD.">External debt by region 2021.</canvas>
         </div>
       </div>
-      <div class="chart-card">
+      <div class="chart-card reveal">
         <h3>Debt composition</h3>
         <p>Public vs. private non-guaranteed debt breakdown</p>
         <div class="chart-wrap" style="height:260px;">
@@ -115,7 +120,7 @@
         </div>
       </div>
     </div>
-    <div class="chart-card">
+    <div class="chart-card reveal">
       <h3>Global external debt growth trend (low &amp; middle-income countries)</h3>
       <p>Total external debt stock in USD trillions over time</p>
       <div class="chart-wrap" style="height:220px;">
@@ -132,11 +137,5 @@
 </footer>
 
 <script src="js/script.js"></script>
-<script>
-  // Prevents the flash of wrong theme on page load
-  if (localStorage.getItem('ids-theme') === 'light') {
-    document.documentElement.classList.add('light');
-  }
-</script>
 </body>
 </html>
