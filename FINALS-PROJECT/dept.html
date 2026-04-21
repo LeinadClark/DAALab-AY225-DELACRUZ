@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>International Debt Statistics — World Bank</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Source+Sans+3:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Source+Sans+3:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Special+Elite&family=Courier+Prime:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ── DARK MODE (default) ── */
   :root {
     --bg: #0b0f1a;
     --bg2: #111827;
@@ -27,11 +28,487 @@
     --rose: #f43f5e;
     --green: #22c55e;
     --purple: #a78bfa;
+    --nav-bg: rgba(11,15,26,0.92);
     --font-head: 'Playfair Display', Georgia, serif;
     --font-body: 'Source Sans 3', 'Helvetica Neue', sans-serif;
     --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
     --radius: 12px;
     --radius-sm: 8px;
+  }
+
+  /* ── LIGHT MODE — VINTAGE TECHY ── */
+  html.light {
+    --bg: #f5f0e8;
+    --bg2: #ede7d9;
+    --bg3: #e0d9c8;
+    --card: #faf6ee;
+    --card2: #f0ead8;
+    --border: rgba(101,82,50,0.18);
+    --border2: rgba(101,82,50,0.32);
+    --text: #1a1208;
+    --text2: #4a3c28;
+    --text3: #8a7a60;
+    --accent: #8b4513;
+    --accent2: #a0522d;
+    --gold: #b8860b;
+    --teal: #2e6b5e;
+    --rose: #8b2230;
+    --green: #3a6b35;
+    --purple: #5c3d7a;
+    --nav-bg: rgba(232,224,208,0.96);
+    --vt-amber: #c8860a;
+    --vt-ink: #1a1208;
+    --vt-paper: #faf6ee;
+    --vt-rule: rgba(101,82,50,0.22);
+    --vt-stamp: #7a3020;
+  }
+
+  /* ─── VINTAGE BODY TEXTURE ─── */
+  html.light body {
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(101,82,50,0.08) 1px, transparent 0);
+    background-size: 24px 24px;
+    font-family: 'Courier Prime', 'Courier New', monospace;
+  }
+
+  /* ─── VINTAGE NAV ─── */
+  html.light nav {
+    background: var(--nav-bg);
+    border-bottom: 2px solid var(--border2);
+    box-shadow: 0 2px 0 rgba(101,82,50,0.08);
+  }
+  html.light .nav-brand {
+    font-family: 'Special Elite', serif;
+    font-size: 17px;
+    letter-spacing: 0.04em;
+    color: var(--vt-ink);
+  }
+  html.light .nav-brand .dot {
+    background: var(--vt-amber);
+    width: 7px; height: 7px;
+    border-radius: 2px;
+  }
+  html.light .nav-links a {
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 3px;
+  }
+  html.light .nav-links a:hover,
+  html.light .nav-links a.active {
+    background: var(--bg3);
+    color: var(--vt-ink);
+    border: 1px solid var(--border2);
+  }
+  html.light .nav-badge {
+    background: var(--vt-stamp);
+    color: #f5f0e8;
+    border-radius: 2px;
+    font-family: 'Courier Prime', monospace;
+    letter-spacing: 0.06em;
+    font-size: 9px;
+    padding: 3px 8px;
+    text-transform: uppercase;
+  }
+
+  /* ─── VINTAGE HERO ─── */
+  html.light .hero::before {
+    background: radial-gradient(circle, rgba(184,134,11,0.1) 0%, transparent 70%);
+  }
+  html.light .hero-tag {
+    background: rgba(139,69,19,0.08);
+    border: 1px solid rgba(139,69,19,0.3);
+    color: var(--accent2);
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 2px;
+  }
+  html.light .hero h1 {
+    font-family: 'Special Elite', serif;
+    letter-spacing: 0.02em;
+    color: var(--vt-ink);
+    text-shadow: 1px 1px 0 rgba(101,82,50,0.15);
+  }
+  html.light .hero h1 span {
+    color: var(--vt-amber);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 6px;
+  }
+  html.light .hero-desc {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 15px;
+    color: var(--text2);
+    font-style: italic;
+    line-height: 1.8;
+  }
+
+  /* ─── VINTAGE STAT PILLS ─── */
+  html.light .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    box-shadow: 3px 3px 0 rgba(101,82,50,0.12);
+    position: relative;
+  }
+  html.light .stat-pill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 23px,
+      rgba(101,82,50,0.05) 23px,
+      rgba(101,82,50,0.05) 24px
+    );
+    pointer-events: none;
+  }
+  html.light .stat-pill .val {
+    font-family: 'Special Elite', serif;
+    color: var(--vt-amber);
+  }
+  html.light .stat-pill .lbl {
+    font-family: 'Courier Prime', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  /* ─── VINTAGE SECTION HEADER ─── */
+  html.light .section-header {
+    border-bottom: 2px solid var(--border2);
+  }
+  html.light .section-header h2 {
+    font-family: 'Special Elite', serif;
+    letter-spacing: 0.04em;
+    color: var(--vt-ink);
+  }
+  html.light .section-num {
+    background: var(--vt-stamp);
+    color: #f5f0e8;
+    border: none;
+    border-radius: 2px;
+    font-family: 'Courier Prime', monospace;
+  }
+  html.light .section-header p {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ─── VINTAGE CARDS ─── */
+  html.light .cat-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    box-shadow: 4px 4px 0 rgba(101,82,50,0.1);
+  }
+  html.light .cat-card::before { height: 3px; }
+  html.light .cat-card.blue::before  { background: repeating-linear-gradient(90deg,var(--accent) 0,var(--accent) 6px,transparent 6px,transparent 10px); }
+  html.light .cat-card.gold::before  { background: repeating-linear-gradient(90deg,var(--gold) 0,var(--gold) 6px,transparent 6px,transparent 10px); }
+  html.light .cat-card.teal::before  { background: repeating-linear-gradient(90deg,var(--teal) 0,var(--teal) 6px,transparent 6px,transparent 10px); }
+  html.light .cat-card.rose::before  { background: repeating-linear-gradient(90deg,var(--rose) 0,var(--rose) 6px,transparent 6px,transparent 10px); }
+  html.light .cat-card.green::before { background: repeating-linear-gradient(90deg,var(--green) 0,var(--green) 6px,transparent 6px,transparent 10px); }
+  html.light .cat-card.purple::before{ background: repeating-linear-gradient(90deg,var(--purple) 0,var(--purple) 6px,transparent 6px,transparent 10px); }
+  html.light .cat-card h3 {
+    font-family: 'Special Elite', serif;
+    color: var(--vt-ink);
+    letter-spacing: 0.03em;
+  }
+  html.light .cat-card p {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text2);
+  }
+  html.light .tag {
+    font-family: 'Courier Prime', monospace;
+    font-size: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    letter-spacing: 0.06em;
+    color: var(--text2);
+  }
+  html.light .cat-icon.blue   { background: rgba(139,69,19,0.08); }
+  html.light .cat-icon.gold   { background: rgba(184,134,11,0.1); }
+  html.light .cat-icon.teal   { background: rgba(46,107,94,0.1); }
+  html.light .cat-icon.rose   { background: rgba(139,34,48,0.08); }
+  html.light .cat-icon.green  { background: rgba(58,107,53,0.1); }
+  html.light .cat-icon.purple { background: rgba(92,61,122,0.1); }
+
+  /* ─── VINTAGE CHART CARDS ─── */
+  html.light .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    box-shadow: 4px 4px 0 rgba(101,82,50,0.1);
+    position: relative;
+  }
+  html.light .chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: repeating-linear-gradient(90deg,var(--vt-amber) 0,var(--vt-amber) 8px,transparent 8px,transparent 14px);
+  }
+  html.light .chart-card h3 {
+    font-family: 'Special Elite', serif;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--vt-ink);
+  }
+  html.light .chart-card p {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+
+  /* ─── VINTAGE TABLE ─── */
+  html.light thead {
+    background: var(--bg3);
+    border-bottom: 2px solid var(--border2);
+  }
+  html.light thead th {
+    font-family: 'Courier Prime', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+  html.light tbody tr:hover { background: rgba(184,134,11,0.06); }
+  html.light td { font-family: 'Courier Prime', monospace; font-size: 12px; }
+  html.light td.country {
+    font-family: 'Libre Baskerville', serif;
+    font-weight: 700;
+    color: var(--vt-ink);
+    font-size: 13px;
+  }
+  html.light td.value { color: var(--vt-amber); font-weight: 700; }
+  html.light td.year  { color: var(--text3); }
+  html.light .tbl-wrap {
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    box-shadow: 3px 3px 0 rgba(101,82,50,0.1);
+  }
+  html.light .tbl-footer {
+    background: var(--bg3);
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    border-top: 2px solid var(--border2);
+  }
+
+  /* ─── VINTAGE FORM CONTROLS ─── */
+  html.light .table-controls input,
+  html.light .table-controls select {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    color: var(--vt-ink);
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    border-radius: 3px;
+    box-shadow: 2px 2px 0 rgba(101,82,50,0.1);
+  }
+  html.light .load-btn {
+    background: var(--vt-stamp);
+    border: 1px solid var(--vt-stamp);
+    color: #f5f0e8;
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    box-shadow: 2px 2px 0 rgba(101,82,50,0.25);
+  }
+  html.light .load-btn:hover {
+    background: #5a2015;
+    box-shadow: 1px 1px 0 rgba(101,82,50,0.25);
+    transform: translate(1px,1px);
+  }
+
+  /* ─── VINTAGE LIVE BAR ─── */
+  html.light .live-bar {
+    background: rgba(58,107,53,0.07);
+    border: 1px solid rgba(58,107,53,0.25);
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    border-radius: 3px;
+  }
+
+  /* ─── VINTAGE IND CARDS ─── */
+  html.light .ind-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    box-shadow: 3px 3px 0 rgba(101,82,50,0.1);
+  }
+  html.light .ind-num {
+    font-family: 'Courier Prime', monospace;
+    background: rgba(139,69,19,0.08);
+    border: 1px solid rgba(139,69,19,0.25);
+    color: var(--accent);
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+  html.light .ind-content h4 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 13px;
+    color: var(--vt-ink);
+  }
+  html.light .ind-content p {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+
+  /* ─── VINTAGE DOWNLOAD CARDS ─── */
+  html.light .dl-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    box-shadow: 4px 4px 0 rgba(101,82,50,0.1);
+  }
+  html.light .dl-card h4 {
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--vt-ink);
+    letter-spacing: 0.04em;
+  }
+  html.light .dl-card p {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  html.light .dl-badge {
+    background: rgba(139,69,19,0.1);
+    border: 1px solid rgba(139,69,19,0.3);
+    color: var(--accent);
+    border-radius: 2px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  html.light .dl-size { color: var(--text3); font-family: 'Courier Prime', monospace; font-size: 10px; }
+  html.light .dl-meta span {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: var(--text2);
+  }
+  html.light .dl-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    box-shadow: 2px 2px 0 rgba(101,82,50,0.12);
+  }
+  html.light .dl-btn:hover {
+    background: var(--card2);
+    color: var(--vt-ink);
+    border-color: var(--accent);
+    box-shadow: 1px 1px 0 rgba(101,82,50,0.12);
+    transform: translate(1px,1px);
+  }
+  html.light .dl-btn.primary {
+    background: rgba(139,69,19,0.1);
+    border-color: rgba(139,69,19,0.35);
+    color: var(--accent);
+  }
+  html.light .dl-all-btn {
+    background: var(--vt-amber);
+    color: #1a1208;
+    border-radius: 2px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 rgba(101,82,50,0.25);
+  }
+  html.light .dl-notice {
+    background: rgba(184,134,11,0.07);
+    border: 1px solid rgba(184,134,11,0.3);
+    border-left: 4px solid var(--vt-amber);
+    border-radius: 3px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  html.light .dl-notice strong { color: var(--vt-ink); }
+  html.light .dl-notice a { color: var(--accent2); }
+
+  /* ─── VINTAGE API TIP ─── */
+  html.light .api-tip {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-left: 4px solid var(--vt-amber);
+    border-radius: 3px;
+    box-shadow: 3px 3px 0 rgba(101,82,50,0.1);
+  }
+  html.light .code-block {
+    background: #1a1208;
+    border: 1px solid rgba(101,82,50,0.5);
+    border-radius: 3px;
+    color: #c8a84b;
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.4);
+  }
+
+  /* ─── VINTAGE FOOTER ─── */
+  html.light footer {
+    border-top: 2px solid var(--border2);
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--text3);
+  }
+  html.light footer a { color: var(--accent); }
+
+  /* ─── VINTAGE TOGGLE ─── */
+  html.light .toggle-track {
+    background: #e8ddc8;
+    border-color: rgba(101,82,50,0.4);
+    border-radius: 3px;
+    box-shadow: 2px 2px 0 rgba(101,82,50,0.2);
+  }
+  html.light .toggle-thumb {
+    background: var(--vt-amber);
+    border-radius: 2px;
+    transform: translateX(28px);
+    box-shadow: 1px 1px 0 rgba(101,82,50,0.3);
+  }
+
+  /* smooth transition on theme switch */
+  body, nav, .cat-card, .chart-card, .ind-card, .dl-card, .stat-pill,
+  .tbl-wrap, thead, tbody tr, .api-tip, .live-bar, .dl-notice, .dl-all-btn,
+  .table-controls input, .table-controls select, .tbl-footer, .load-btn,
+  .dl-btn, .code-block, .nav-links a, footer {
+    transition: background-color 0.28s ease, border-color 0.28s ease,
+                color 0.22s ease, box-shadow 0.28s ease;
   }
 
   body {
@@ -48,7 +525,7 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(11,15,26,0.92);
+    background: var(--nav-bg);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
     padding: 0 2rem;
@@ -597,6 +1074,59 @@
     overflow-x: auto;
   }
 
+
+  /* ── THEME TOGGLE BUTTON ── */
+  #theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+  }
+  .toggle-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 56px;
+    height: 28px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 0 5px;
+    justify-content: space-between;
+    transition: background 0.28s, border-color 0.28s;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+  }
+  html.light .toggle-track {
+    background: #dde8ff;
+    border-color: #b8cbf5;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .toggle-thumb {
+    position: absolute;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.28s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    z-index: 2;
+  }
+  html.light .toggle-thumb {
+    transform: translateX(28px);
+    background: #f59e0b;
+  }
+  .toggle-icon {
+    font-size: 12px;
+    line-height: 1;
+    z-index: 1;
+    user-select: none;
+  }
+  .toggle-icon.moon { order: -1; }
+  .toggle-icon.sun  { order: 1; }
+
   @media (max-width: 900px) {
     .dl-grid { grid-template-columns: 1fr 1fr; }
     .dl-notice { flex-direction: column; align-items: flex-start; }
@@ -627,7 +1157,16 @@
     <a onclick="showPage('dataset')">Dataset</a>
     <a onclick="showPage('indicators')">Indicators</a>
   </div>
-  <span class="nav-badge">World Bank</span>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="nav-badge">World Bank</span>
+    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle theme">
+      <span class="toggle-track">
+        <span class="toggle-thumb"></span>
+        <span class="toggle-icon moon">🌙</span>
+        <span class="toggle-icon sun">☀️</span>
+      </span>
+    </button>
+  </div>
 </nav>
 
 <!-- OVERVIEW PAGE -->
@@ -1088,10 +1627,14 @@ function showPage(name) {
 }
 
 // ── CHARTS (static/illustrative) ──────────────────────────────────────
-const CHART_TEXT = '#8b9ab5';
-const CHART_GRID = 'rgba(255,255,255,0.05)';
+function CHART_TEXT() {
+  return document.documentElement.classList.contains('light') ? '#4a3c28' : '#8b9ab5';
+}
+function CHART_GRID() {
+  return document.documentElement.classList.contains('light') ? 'rgba(101,82,50,0.15)' : 'rgba(255,255,255,0.05)';
+}
 
-Chart.defaults.color = CHART_TEXT;
+Chart.defaults.color = CHART_TEXT();
 Chart.defaults.font.family = "'DM Sans', sans-serif";
 
 new Chart(document.getElementById('regionChart'), {
@@ -1110,8 +1653,8 @@ new Chart(document.getElementById('regionChart'), {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT, font: { size: 11 } } },
-      y: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT, callback: v => '$' + v + 'B', font: { size: 11 } } }
+      x: { grid: { color: CHART_GRID() }, ticks: { color: CHART_TEXT(), font: { size: 11 } } },
+      y: { grid: { color: CHART_GRID() }, ticks: { color: CHART_TEXT(), callback: v => '$' + v + 'B', font: { size: 11 } } }
     }
   }
 });
@@ -1134,7 +1677,7 @@ new Chart(document.getElementById('compChart'), {
     plugins: {
       legend: {
         position: 'bottom',
-        labels: { color: CHART_TEXT, font: { size: 11 }, boxWidth: 10, padding: 12 }
+        labels: { color: CHART_TEXT(), font: { size: 11 }, boxWidth: 10, padding: 12 }
       }
     }
   }
@@ -1160,8 +1703,8 @@ new Chart(document.getElementById('trendChart'), {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT, font: { size: 11 } } },
-      y: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT, callback: v => '$' + v + 'T', font: { size: 11 } } }
+      x: { grid: { color: CHART_GRID() }, ticks: { color: CHART_TEXT(), font: { size: 11 } } },
+      y: { grid: { color: CHART_GRID() }, ticks: { color: CHART_TEXT(), callback: v => '$' + v + 'T', font: { size: 11 } } }
     }
   }
 });
@@ -1261,7 +1804,12 @@ function renderTopDebtors(rows) {
       datasets: [{
         label: 'External Debt (USD)',
         data: sorted.map(r => +(r.value / 1e9).toFixed(1)),
-        backgroundColor: sorted.map((_, i) => i === 0 ? '#f59e0b' : i < 3 ? '#3b82f6' : '#1e3a5f'),
+        backgroundColor: sorted.map((_, i) => {
+          const light = document.documentElement.classList.contains('light');
+          if (i === 0) return light ? '#b8860b' : '#f59e0b';
+          if (i < 3)  return light ? '#8b4513' : '#3b82f6';
+          return light ? '#c8b89a' : '#1e3a5f';
+        }),
         borderRadius: 4,
         borderSkipped: false
       }]
@@ -1271,12 +1819,46 @@ function renderTopDebtors(rows) {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { color: CHART_GRID }, ticks: { color: CHART_TEXT, callback: v => '$' + v + 'B', font: { size: 11 } } },
-        y: { grid: { color: 'transparent' }, ticks: { color: CHART_TEXT, font: { size: 12 } } }
+        x: { grid: { color: CHART_GRID() }, ticks: { color: CHART_TEXT(), callback: v => '$' + v + 'B', font: { size: 11 } } },
+        y: { grid: { color: 'transparent' }, ticks: { color: CHART_TEXT(), font: { size: 12 } } }
       }
     }
   });
 }
+
+// ── THEME TOGGLE ──────────────────────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('ids-theme', isLight ? 'light' : 'dark');
+  updateChartTheme(isLight);
+}
+
+function updateChartTheme(isLight) {
+  const TEXT  = isLight ? '#4a3c28' : '#8b9ab5';
+  const GRID  = isLight ? 'rgba(101,82,50,0.15)' : 'rgba(255,255,255,0.05)';
+  Chart.defaults.color = TEXT;
+
+  Chart.instances && Object.values(Chart.instances).forEach(chart => {
+    if (!chart) return;
+    if (chart.options.scales) {
+      ['x','y'].forEach(ax => {
+        if (chart.options.scales[ax]) {
+          chart.options.scales[ax].grid  = chart.options.scales[ax].grid  || {};
+          chart.options.scales[ax].ticks = chart.options.scales[ax].ticks || {};
+          chart.options.scales[ax].grid.color  = GRID;
+          chart.options.scales[ax].ticks.color = TEXT;
+        }
+      });
+    }
+    chart.update('none');
+  });
+}
+
+// Restore saved preference on load
+(function() {
+  const saved = localStorage.getItem('ids-theme');
+  if (saved === 'light') document.documentElement.classList.add('light');
+})();
 </script>
 </body>
 </html>
