@@ -1,78 +1,202 @@
-# Final Project in DAALab-AY225
 
-Group 16    https://www.kaggle.com/datasets/theworldbank/international-debt-statistics  
+---
 
-DELA CRUZ, LEINAD CLARK M.  
-PARANE, JOCELYN B.
+# 📊 International Debt Statistics (IDS) Dashboard
+> A data visualization dashboard for analyzing global external debt trends using real-time World Bank data.
+
+[![Repository](https://img.shields.io/badge/Repository-GitHub-black?style=for-the-badge\&logo=github)](https://github.com/LeinadClark/DAALab-AY225-DELACRUZ)
+
+## **DAALab-AY225 Final Project | Group 16**  
+![Team Work](https://img.shields.io/badge/Team-2%20Developers-yellow?style=for-the-badge)
+**DELA CRUZ, LEINAD CLARK M.**  ![Contributor](https://img.shields.io/badge/LeinadClark-Repo%20Owner,%20lead%20developer%20&%20%20bug%20fixing-blue?style=for-the-badge)
+**PARANE, JOCELYN B.**
+![Contributor](https://img.shields.io/badge/JocelynBaylon-collaborator,%20UI%2FUX%20%26%20Data%20Design-pink?style=for-the-badge)
 
 
-# International Debt Statistics (IDS) Dashboard
 
-A single file web dashboard built with HTML, CSS, and JavaScript that visualizes World Bank external debt data for 125+ countries. Features live API data, interactive charts, and a dark/light theme toggle.
+This project was developed through a **shared Git repository workflow**, following collaborative development practices between team members.
 
-# How to
-1. Save the file as `index.html`
-2. Double-click the file
-3. It opens directly in your browser — no setup needed
+![Version Control](https://img.shields.io/badge/Version%20Control-Git-black?style=for-the-badge\&logo=github)
+![Git Collaboration](https://img.shields.io/badge/Git-Collaborative%20Project-blue?style=for-the-badge\&logo=git)
 
+## 🛠️ Tech Stack
+
+![HTML5](https://img.shields.io/badge/HTML5-%23E34F26.svg?style=for-the-badge\&logo=html5\&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-%231572B6.svg?style=for-the-badge\&logo=css3\&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-%23F7DF1E.svg?style=for-the-badge\&logo=javascript\&logoColor=black)
+![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge\&logo=chartdotjs\&logoColor=white)
+![REST API](https://img.shields.io/badge/REST%20API-02569B.svg?style=for-the-badge\&logo=api\&logoColor=white)
+![LocalStorage](https://img.shields.io/badge/LocalStorage-F7DF1E.svg?style=for-the-badge\&logo=javascript\&logoColor=black)
+
+---
+
+## 🧩 Architecture
+
+![Frontend Only](https://img.shields.io/badge/Architecture-Frontend--Only-blue?style=for-the-badge)
+![Client Side Rendering](https://img.shields.io/badge/Rendering-Client--Side-green?style=for-the-badge)
+![No Backend](https://img.shields.io/badge/Backend-None-critical?style=for-the-badge)
+
+---
+
+## 📌 Project Metadata
+
+![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
+![Project Type](https://img.shields.io/badge/Project-Academic-blueviolet?style=for-the-badge)
+
+---
+
+## 📊 Data Source
+
+![Data Source](https://img.shields.io/badge/Data-World%20Bank%20API-orange?style=for-the-badge)
+
+[![Dataset](https://img.shields.io/badge/Dataset-World%20Bank%20IDS-orange?style=for-the-badge\&logo=kaggle)](https://www.kaggle.com/datasets/theworldbank/international-debt-statistics)
+
+---
+
+
+## ⚡ Key Features
+
+* 📡 Real-time data integration from World Bank API
+* 📊 Interactive charts powered by Chart.js
+* 🌍 Coverage of 125+ countries
+* 🔍 Searchable and filterable dataset
+* 🌗 Persistent dark/light theme (localStorage)
+* ⚡ Fully client-side (no backend required)
+
+---
+
+## 🧠 Project Overview
+
+This project visualizes **external debt statistics** across low- and middle-income countries using dynamic, real-time data.
+
+It enables users to:
+
+* Analyze global debt distribution
+* Compare countries based on debt levels
+* Explore economic trends through interactive charts
+
+The dashboard highlights patterns in **debt stocks, composition, and growth**, offering insights into global financial structures and disparities.
+
+---
 
 ## 📁 Project Structure
- 
+
+```text
+FINALS-PROJECT/
+├── index.html          # Landing / Overview
+├── finals-proj.html    # Main dashboard page
+├── dataset.html        # Live dataset + charts
+├── categories.html     # IDS categories breakdown
+├── indicators.html     # Indicator reference guide
+├── css/
+│   └── styles.css      # Global styles
+├── js/
+│   └── script.js       # Core logic + API handling
+└── README.md
 ```
-index.html   ← The entire application (HTML + CSS + JS in one file)
-README.md    ← This file
-```
- 
-No additional files, folders, or installation needed.
- 
+
 ---
- 
+
+## 🚀 How to Run
+
+1. Clone or download the repository
+2. Open `index.html` in any modern browser
+3. Navigate through the dashboard pages
+
+> ⚠️ No installation or setup required.
+
+---
+
 ## 🌐 Requirements
- 
-| Requirement | Details |
-|---|---|
-| Modern browser | Chrome, Firefox, Edge, or Safari |
-| Internet connection | Required for charts (Chart.js CDN) and live data (World Bank API) |
-| Python / Node.js | Only needed if live data tab isn't working |
- 
+
+| Requirement         | Description                                           |
+| ------------------- | ----------------------------------------------------- |
+| Modern Browser      | Chrome, Firefox, Edge, Safari                         |
+| Internet Connection | Required for API requests and Chart.js CDN            |
+| Optional Runtime    | Python/Node.js (if browser restricts local API calls) |
+
 ---
- 
+
 ## 📄 Pages & Features
- 
-| Page | What it does |
-|---|---|
-| **Overview** | Shows key stats and 3 illustrative charts (regional debt, debt composition, global trend) |
-| **Categories** | Explains the 6 data categories and links to download CSV files from Kaggle |
-| **Dataset** | Fetches real-time data from the World Bank API — click **"Load dataset ↗"** |
-| **Indicators** | Reference guide for 12 key IDS indicator codes with definitions |
- 
+
+| Page               | Description                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| **Overview**       | Displays global summaries and key visualizations (regional debt, composition, trends) |
+| **Categories**     | Explains the 6 IDS data groups with downloadable dataset links                        |
+| **Dataset (Live)** | Fetches real-time data and renders charts + searchable table                          |
+| **Indicators**     | Technical reference for key IDS indicator codes                                       |
+
 ---
- 
-## 🔴 Live Data (Dataset Tab)
- 
-Click the **"Load dataset ↗"** button on the Dataset page. It will:
- 
-1. Connect to `https://api.worldbank.org/v2/`
-2. Fetch external debt data for all countries (indicator `DT.DOD.DECT.CD`)
-3. Populate the table and render the **Top 15 Debtors** chart
-You can then search by country name using the search box.
- 
+
+## 🔴 Live Data Integration
+
+This feature allows the system to fetch and display real-time external debt data from an online API.
+
+### How to load the dataset:
+
+1. Navigate to the **Dataset** page  
+2. Click the **"Load Dataset ↗"** button  
+3. The system will automatically:
+
+   - Connect to the World Bank API (`https://api.worldbank.org/v2/`)
+   - Retrieve external debt data (`DT.DOD.DECT.CD`)
+   - Populate the data table with fetched results  
+   - Generate a **Top 15 Debtors** visualization chart  
+
 ---
- 
-## 🎨 Theme Toggle
- 
-Click the 🌙 / ☀️ toggle in the top-right corner to switch between:
-- **Dark mode** — default navy/blue theme
-- **Light mode** — vintage paper/amber theme
-Your preference is saved automatically in your browser.
- 
+
+
+## 🎨 UI & Theme System
+
+The dashboard includes a persistent theme toggle stored in `localStorage`:
+
+* 🌙 **Dark Mode (Default):** High-contrast navy/blue interface
+* ☀️ **Light Mode:** Vintage-inspired amber/paper aesthetic
+
+Designed for both readability and visual appeal.
+
 ---
- 
-## 📦 External Dependencies (CDN — no install needed)
- 
-| Library | Version | Purpose |
-|---|---|---|
-| [Chart.js](https://www.chartjs.org/) | 4.4.1 | All charts and visualizations |
-| [Google Fonts](https://fonts.google.com/) | — | Typography (Playfair Display, IBM Plex Mono, etc.) |
-| [World Bank API](https://data.worldbank.org/) | v2 | Live debt data on the Dataset page |
- 
+
+## 📦 External Dependencies
+
+| Library        | Version | Purpose            |
+| -------------- | ------- | ------------------ |
+| Chart.js       | 4.4.1   | Data visualization |
+| Google Fonts   | Latest  | Typography         |
+| World Bank API | v2      | Live data source   |
+
+---
+
+## 📌 Key Indicator Example
+
+* `DT.DOD.DECT.CD` → External debt stocks (current US$)
+  Used to rank countries and generate comparative visualizations.
+
+---
+
+## 🔧 Key Contributions & Skills Applied
+* API integration with live World Bank data
+* Data visualization using Chart.js
+* Modular front-end architecture design
+* Real-world dataset exploration and analysis
+* Collaborative development using Git workflows
+
+It reflects real-world development practices, including shared version control, coordinated feature development, and iterative integration.
+
+---
+
+
+
+
+## 🌿 Git Workflow
+
+![Branching](https://img.shields.io/badge/Workflow-Feature%20Branching-lightgrey?style=for-the-badge)
+![Integration](https://img.shields.io/badge/Integration-Manual%20Merge-yellow?style=for-the-badge)
+
+* Main branch used for stable builds
+* Feature-based development per module
+* Regular commits for incremental progress
+* Manual review before final integration
+
+---
+g
