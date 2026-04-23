@@ -104,29 +104,100 @@
       <h2>Regional Debt Overview</h2>
       <p>External debt stocks by region (USD billions)</p>
     </div>
+
     <div class="charts-row">
+
+      <!-- Regional Chart Card -->
       <div class="chart-card reveal">
-        <h3>External debt by region (2021)</h3>
-        <p>Long-term external debt stocks in USD billions</p>
+        <div class="chart-card-header">
+          <div>
+            <h3>External debt by region (2021)</h3>
+            <p>Long-term external debt stocks in USD billions</p>
+          </div>
+          <div class="type-switcher" id="region-switcher" role="group" aria-label="Chart type for regional debt">
+            <button class="type-btn active" onclick="switchRegion('bar', this)" title="Bar chart">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="5" width="3" height="8" rx="1" fill="currentColor"/><rect x="5.5" y="2" width="3" height="11" rx="1" fill="currentColor"/><rect x="10" y="7" width="3" height="6" rx="1" fill="currentColor"/></svg>
+              Bar
+            </button>
+            <button class="type-btn" onclick="switchRegion('line', this)" title="Line chart">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="1,11 4,6 7,8 10,3 13,5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Line
+            </button>
+            <button class="type-btn" onclick="switchRegion('radar', this)" title="Radar chart">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polygon points="7,1 13,5 11,12 3,12 1,5" stroke="currentColor" stroke-width="1.2" fill="none"/><polygon points="7,4 10,6 9,10 5,10 4,6" stroke="currentColor" stroke-width="1" fill="currentColor" opacity="0.3"/></svg>
+              Radar
+            </button>
+            <button class="type-btn" onclick="switchRegion('polarArea', this)" title="Polar area chart">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="7" y1="1.5" x2="7" y2="12.5" stroke="currentColor" stroke-width="0.8"/><line x1="1.5" y1="7" x2="12.5" y2="7" stroke="currentColor" stroke-width="0.8"/></svg>
+              Polar
+            </button>
+          </div>
+        </div>
         <div class="chart-wrap" style="height:260px;">
-          <canvas id="regionChart" role="img" aria-label="Bar chart showing external debt by region. East Asia Pacific leads with over 3 trillion USD.">External debt by region 2021.</canvas>
+          <canvas id="regionChart" role="img" aria-label="Chart showing external debt by region."></canvas>
         </div>
       </div>
+
+      <!-- Composition Chart Card -->
       <div class="chart-card reveal">
-        <h3>Debt composition</h3>
-        <p>Public vs. private non-guaranteed debt breakdown</p>
+        <div class="chart-card-header">
+          <div>
+            <h3>Debt composition</h3>
+            <p>Public vs. private non-guaranteed debt breakdown</p>
+          </div>
+          <div class="type-switcher" id="comp-switcher" role="group" aria-label="Chart type for debt composition">
+            <button class="type-btn active" onclick="switchComp('doughnut', this)" title="Doughnut chart">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1" fill="none"/></svg>
+              Donut
+            </button>
+            <button class="type-btn" onclick="switchComp('pie', this)" title="Pie chart">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5 A5.5 5.5 0 1 1 1.5 7 L7 7 Z" fill="currentColor" opacity="0.6"/><path d="M7 7 L1.5 7 A5.5 5.5 0 0 1 7 1.5 Z" fill="currentColor"/></svg>
+              Pie
+            </button>
+            <button class="type-btn" onclick="switchComp('bar', this)" title="Bar chart">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="5" width="3" height="8" rx="1" fill="currentColor"/><rect x="5.5" y="2" width="3" height="11" rx="1" fill="currentColor"/><rect x="10" y="7" width="3" height="6" rx="1" fill="currentColor"/></svg>
+              Bar
+            </button>
+            <button class="type-btn" onclick="switchComp('polarArea', this)" title="Polar area chart">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="7" y1="1.5" x2="7" y2="12.5" stroke="currentColor" stroke-width="0.8"/><line x1="1.5" y1="7" x2="12.5" y2="7" stroke="currentColor" stroke-width="0.8"/></svg>
+              Polar
+            </button>
+          </div>
+        </div>
         <div class="chart-wrap" style="height:260px;">
-          <canvas id="compChart" role="img" aria-label="Doughnut chart showing debt composition. Public and publicly guaranteed debt is 52%, private non-guaranteed 28%, short-term 20%.">Debt composition breakdown.</canvas>
+          <canvas id="compChart" role="img" aria-label="Chart showing debt composition breakdown."></canvas>
         </div>
       </div>
+
     </div>
+
+    <!-- Trend Chart Card -->
     <div class="chart-card reveal">
-      <h3>Global external debt growth trend (low &amp; middle-income countries)</h3>
-      <p>Total external debt stock in USD trillions over time</p>
+      <div class="chart-card-header">
+        <div>
+          <h3>Global external debt growth trend (low &amp; middle-income countries)</h3>
+          <p>Total external debt stock in USD trillions over time</p>
+        </div>
+        <div class="type-switcher" id="trend-switcher" role="group" aria-label="Chart type for debt trend">
+          <button class="type-btn active" onclick="switchTrend('line', this)" title="Line chart">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="1,11 4,6 7,8 10,3 13,5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Line
+          </button>
+          <button class="type-btn" onclick="switchTrend('bar', this)" title="Bar chart">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="5" width="3" height="8" rx="1" fill="currentColor"/><rect x="5.5" y="2" width="3" height="11" rx="1" fill="currentColor"/><rect x="10" y="7" width="3" height="6" rx="1" fill="currentColor"/></svg>
+            Bar
+          </button>
+          <button class="type-btn" onclick="switchTrend('scatter', this)" title="Scatter chart">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="10" r="1.5" fill="currentColor"/><circle cx="6" cy="6" r="1.5" fill="currentColor"/><circle cx="9" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="3" r="1.5" fill="currentColor"/></svg>
+            Scatter
+          </button>
+        </div>
+      </div>
       <div class="chart-wrap" style="height:220px;">
-        <canvas id="trendChart" role="img" aria-label="Line chart showing external debt growth from 2000 to 2022, rising from about 2 trillion to 9 trillion USD.">Global debt trend 2000-2022.</canvas>
+        <canvas id="trendChart" role="img" aria-label="Line chart showing external debt growth from 2000 to 2022."></canvas>
       </div>
     </div>
+
   </section>
 </main>
 

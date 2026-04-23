@@ -58,6 +58,7 @@ This project was developed through a **shared Git repository workflow**, followi
 
 * 📡 Real-time data integration from World Bank API
 * 📊 Interactive charts powered by Chart.js
+* 🔀 Chart type switcher — toggle between multiple visualization types per chart
 * 🌍 Coverage of 125+ countries
 * 🔍 Searchable and filterable dataset
 * 🌗 Persistent dark/light theme (localStorage)
@@ -74,6 +75,9 @@ It enables users to:
 * Analyze global debt distribution
 * Compare countries based on debt levels
 * Explore economic trends through interactive charts
+* Switch chart visualization types on the fly for deeper data exploration
+
+
 
 The dashboard highlights patterns in **debt stocks, composition, and growth**, offering insights into global financial structures and disparities.
 
@@ -90,6 +94,7 @@ FINALS-PROJECT/
 ├── indicators.html     # Indicator reference guide
 ├── css/
 │   └── styles.css      # Global styles
+    └── chart-switcher.css  # Chart type switcher styles
 ├── js/
 │   └── script.js       # Core logic + API handling
 └── README.md

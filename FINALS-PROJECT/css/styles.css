@@ -1196,3 +1196,82 @@ html.light .toggle-thumb {
   .hero, main { padding-left: 1rem; padding-right: 1rem; }
   .hero h1 { font-size: 2rem; }
 }
+/* ── CHART CARD HEADER with switcher ───────────────────────────────── */
+.chart-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.chart-card-header > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── CHART TYPE SWITCHER ────────────────────────────────────────────── */
+.type-switcher {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.type-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-family: inherit;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted, #8b9ab5);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.type-btn svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.type-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text, #c8d4e8);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.type-btn.active {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.35);
+  font-weight: 600;
+}
+
+.type-btn.active svg {
+  opacity: 1;
+}
+
+/* Light mode overrides */
+.light .type-btn {
+  color: var(--text-muted, #8a7560);
+}
+
+.light .type-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text, #2a1f0e);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.light .type-btn.active {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.3);
+}
