@@ -125,7 +125,7 @@ function buildCompConfig(type) {
 
 function buildTrendConfig(type) {
   const isScatter = type === 'scatter';
-
+//  Scatter charts require {x, y} object pairs instead of flat value arrays
   const scatterData = TREND_LABELS.map((l, i) => ({ x: +l, y: TREND_DATA[i] }));
 
   const dataset = isScatter
@@ -186,6 +186,7 @@ function setActiveSwitcher(switcherId, clickedBtn) {
 // ── SWITCH FUNCTIONS (called from HTML onclick) ────────────────────────
 function switchRegion(type, btn) {
   setActiveSwitcher('region-switcher', btn);
+
   if (regionChartInstance) regionChartInstance.destroy();
   regionChartInstance = new Chart(document.getElementById('regionChart'), buildRegionConfig(type));
 }

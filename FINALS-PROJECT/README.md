@@ -160,7 +160,7 @@ The dashboard includes a persistent theme toggle stored in `localStorage`:
 
 Designed for both readability and visual appeal.
 
----
+
 
 ## 📦 External Dependencies
 
