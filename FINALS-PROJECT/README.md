@@ -204,3 +204,5 @@ It reflects real-world development practices, including shared version control, 
 * Manual review before final integration
 
 ---
+* Comments were added to the other codes
+---
