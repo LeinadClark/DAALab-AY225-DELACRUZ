@@ -63,6 +63,8 @@
         <option value="Middle East">Middle East & N. Africa</option>
       </select>
       <button class="load-btn" id="load-btn" onclick="loadData()">Load dataset ↗</button>
+      <input type="file" id="csv-upload" accept=".csv" style="display:none" onchange="handleFileUpload(event)">
+      <button class="upload-btn" onclick="document.getElementById('csv-upload').click()">Upload CSV</button>
     </div>
 
     <div class="tbl-wrap">

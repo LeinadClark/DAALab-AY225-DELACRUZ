@@ -822,6 +822,18 @@ td.year { font-family: var(--font-mono); color: var(--text3); font-size: 12px; }
 }
 .load-btn:hover { background: rgba(59,130,246,0.2); }
 .load-btn:disabled { opacity: 0.4; cursor: default; }
+.upload-btn {
+  background: rgba(20,184,166,0.1);
+  border: 1px solid rgba(20,184,166,0.3);
+  color: var(--teal);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 0.2s;
+}
+.upload-btn:hover { background: rgba(20,184,166,0.2); }
 
 /* ─── ANIMATIONS ─── */
 @keyframes fadeInUp {

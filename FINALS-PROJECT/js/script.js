@@ -267,13 +267,11 @@ function renderTable(rows) {
     return;
   }
   const display = rows.slice(0, 200);
+  const headers = Object.keys(display[0]);
+  
   tbody.innerHTML = display.map(r => `
     <tr>
-      <td class="country">${r.country}</td>
-      <td class="year">${r.code}</td>
-      <td class="indicator">${r.indicator}</td>
-      <td class="year">${r.year}</td>
-      <td class="value">${fmt(r.value)}</td>
+      ${headers.map(header => `<td>${r[header] || '—'}</td>`).join('')}
     </tr>
   `).join('');
   document.getElementById('row-count').textContent = rows.length + ' records' + (rows.length > 200 ? ' (showing 200)' : '');
@@ -283,7 +281,7 @@ function filterTable() {
   if (allRows.length === 0) return;
   const q = document.getElementById('search-input').value.toLowerCase();
   const filtered = allRows.filter(r => {
-    return !q || r.country.toLowerCase().includes(q) || r.indicator.toLowerCase().includes(q);
+    return !q || Object.values(r).some(val => String(val).toLowerCase().includes(q));
   });
   renderTable(filtered);
 }
@@ -355,6 +353,333 @@ function updateChartTheme(isLight) {
     }
     chart.update('none');
   });
+}
+
+// ── CSV FILE UPLOAD ───────────────────────────────────────────────────
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  const status = document.getElementById('api-status');
+  const tbody = document.getElementById('table-body');
+
+  if (!file) return;
+
+  // Validate file type - only accept CSV files
+  if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+    status.textContent = 'Error: Only CSV files are allowed';
+    status.style.color = 'var(--rose)';
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="5" style="text-align:center;padding:2rem;color:var(--rose);">Invalid file type. Please upload a CSV file.</td></tr>';
+    event.target.value = '';
+    return;
+  }
+
+  status.textContent = 'Reading CSV file...';
+  status.style.color = 'var(--text3)';
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="5" style="text-align:center;padding:2rem;"><span class="spinner"></span> Parsing CSV...</td></tr>';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const csvText = e.target.result;
+      const rows = parseCSV(csvText);
+      
+      if (rows.length === 0) {
+        throw new Error('No data found in CSV');
+      }
+
+      // Keep original CSV data structure for table display
+      allRows = rows;
+
+      status.textContent = allRows.length + ' records loaded from CSV · ' + new Date().toLocaleTimeString();
+      status.style.color = 'var(--green)';
+      renderTable(allRows);
+      
+      // Update table headers to match CSV structure
+      updateTableHeadersFromCSV(rows[0]);
+      
+      // Generate visualizations from uploaded CSV data
+      renderCSVVisualizations(rows);
+
+    } catch (err) {
+      status.textContent = 'Error parsing CSV: ' + err.message;
+      status.style.color = 'var(--rose)';
+      tbody.innerHTML = '<tr class="loading-row"><td colspan="5" style="text-align:center;padding:2rem;color:var(--rose);">Failed to parse CSV file. Please check the file format.</td></tr>';
+    }
+  };
+
+  reader.onerror = function() {
+    status.textContent = 'Error reading file';
+    status.style.color = 'var(--rose)';
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="5" style="text-align:center;padding:2rem;color:var(--rose);">Failed to read the file.</td></tr>';
+  };
+
+  reader.readAsText(file);
+}
+
+function parseCSV(csvText) {
+  const lines = csvText.split('\n').filter(line => line.trim());
+  if (lines.length === 0) return [];
+
+  const headers = parseCSVLine(lines[0]);
+  const data = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = parseCSVLine(lines[i]);
+    if (values.length === headers.length) {
+      const row = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index];
+      });
+      data.push(row);
+    }
+  }
+
+  return data;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function updateTableHeadersFromCSV(sampleRow) {
+  const thead = document.querySelector('#data-table thead tr');
+  const headers = Object.keys(sampleRow);
+  
+  thead.innerHTML = headers.map(header => 
+    `<th>${header}</th>`
+  ).join('');
+}
+
+function renderCSVVisualizations(rows) {
+  if (!rows || rows.length === 0) return;
+  
+  const headers = Object.keys(rows[0]);
+  const numericColumns = headers.filter(header => {
+    return rows.some(row => !isNaN(parseFloat(row[header])) && row[header] !== '');
+  });
+  
+  const textColumns = headers.filter(header => {
+    return rows.some(row => isNaN(parseFloat(row[header])) || row[header] === '');
+  });
+  
+  const labelColumn = textColumns[0] || headers[0];
+  
+  // If we have numeric data, create numeric visualizations
+  if (numericColumns.length > 0) {
+    const valueColumn = numericColumns[0];
+    const sorted = [...rows]
+      .filter(row => !isNaN(parseFloat(row[valueColumn])))
+      .sort((a, b) => parseFloat(b[valueColumn]) - parseFloat(a[valueColumn]))
+      .slice(0, 15);
+    
+    if (sorted.length > 0) {
+      const canvas = document.getElementById('topDebtorsChart');
+      if (topDebtorsChart) topDebtorsChart.destroy();
+      
+      topDebtorsChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: sorted.map(r => r[labelColumn]),
+          datasets: [{
+            label: valueColumn,
+            data: sorted.map(r => parseFloat(r[valueColumn])),
+            backgroundColor: sorted.map((_, i) => {
+              const light = document.documentElement.classList.contains('light');
+              if (i === 0) return light ? '#b8860b' : '#f59e0b';
+              if (i < 3)  return light ? '#8b4513' : '#3b82f6';
+              return light ? '#c8b89a' : '#1e3a5f';
+            }),
+            borderRadius: 4,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { display: false },
+            title: {
+              display: true,
+              text: `Top 15 by ${valueColumn}`,
+              color: CHART_TEXT(),
+              font: { size: 14 }
+            }
+          },
+          scales: {
+            x: { 
+              grid: { color: CHART_GRID() }, 
+              ticks: { color: CHART_TEXT(), font: { size: 11 } } 
+            },
+            y: { 
+              grid: { color: 'transparent' }, 
+              ticks: { color: CHART_TEXT(), font: { size: 12 } } 
+            }
+          }
+        }
+      });
+    }
+    
+    // Create a distribution chart if we have multiple numeric columns
+    if (numericColumns.length >= 2) {
+      const canvas = document.getElementById('regionChart');
+      if (regionChartInstance) regionChartInstance.destroy();
+      
+      const labels = rows.slice(0, 10).map(r => r[labelColumn]);
+      const datasets = numericColumns.slice(0, 3).map((col, idx) => ({
+        label: col,
+        data: rows.slice(0, 10).map(r => parseFloat(r[col]) || 0),
+        backgroundColor: [REGION_COLORS[idx % REGION_COLORS.length]],
+        borderRadius: 4,
+        borderSkipped: false
+      }));
+      
+      regionChartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              labels: { color: CHART_TEXT(), font: { size: 11 }, boxWidth: 10, padding: 10 }
+            },
+            title: {
+              display: true,
+              text: 'Data Distribution',
+              color: CHART_TEXT(),
+              font: { size: 14 }
+            }
+          },
+          scales: {
+            x: { grid: { color: CHART_GRID() }, ticks: { color: CHART_TEXT(), font: { size: 11 } } },
+            y: { grid: { color: CHART_GRID() }, ticks: { color: CHART_TEXT(), font: { size: 11 } } }
+          }
+        }
+      });
+    }
+  } else {
+    // For text-only data (like IDSSeries-Time.csv), create categorical visualizations
+    const canvas = document.getElementById('topDebtorsChart');
+    if (topDebtorsChart) topDebtorsChart.destroy();
+    
+    // Count occurrences of unique values in the first text column
+    const valueCounts = {};
+    rows.forEach(row => {
+      const val = row[labelColumn] || 'Unknown';
+      valueCounts[val] = (valueCounts[val] || 0) + 1;
+    });
+    
+    const sortedLabels = Object.entries(valueCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15);
+    
+    if (sortedLabels.length > 0) {
+      topDebtorsChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: sortedLabels.map(([label]) => label),
+          datasets: [{
+            label: 'Count',
+            data: sortedLabels.map(([, count]) => count),
+            backgroundColor: sortedLabels.map((_, i) => {
+              const light = document.documentElement.classList.contains('light');
+              if (i === 0) return light ? '#b8860b' : '#f59e0b';
+              if (i < 3)  return light ? '#8b4513' : '#3b82f6';
+              return light ? '#c8b89a' : '#1e3a5f';
+            }),
+            borderRadius: 4,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { display: false },
+            title: {
+              display: true,
+              text: `Distribution by ${labelColumn}`,
+              color: CHART_TEXT(),
+              font: { size: 14 }
+            }
+          },
+          scales: {
+            x: { 
+              grid: { color: CHART_GRID() }, 
+              ticks: { color: CHART_TEXT(), font: { size: 11 } } 
+            },
+            y: { 
+              grid: { color: 'transparent' }, 
+              ticks: { color: CHART_TEXT(), font: { size: 12 } } 
+            }
+          }
+        }
+      });
+    }
+    
+    // Create a pie chart for column distribution if we have multiple text columns
+    if (textColumns.length >= 2) {
+      const canvas = document.getElementById('regionChart');
+      if (regionChartInstance) regionChartInstance.destroy();
+      
+      const secondColumnCounts = {};
+      rows.forEach(row => {
+        const val = row[textColumns[1]] || 'Unknown';
+        secondColumnCounts[val] = (secondColumnCounts[val] || 0) + 1;
+      });
+      
+      const pieLabels = Object.keys(secondColumnCounts).slice(0, 8);
+      const pieData = pieLabels.map(label => secondColumnCounts[label]);
+      
+      regionChartInstance = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels: pieLabels,
+          datasets: [{
+            data: pieData,
+            backgroundColor: pieLabels.map((_, i) => REGION_COLORS[i % REGION_COLORS.length]),
+            borderWidth: 2,
+            borderColor: 'transparent'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right',
+              labels: { color: CHART_TEXT(), font: { size: 11 }, boxWidth: 10, padding: 10 }
+            },
+            title: {
+              display: true,
+              text: `Distribution by ${textColumns[1]}`,
+              color: CHART_TEXT(),
+              font: { size: 14 }
+            }
+          }
+        }
+      });
+    }
+  }
 }
 
 // ── RESTORE THEME ON LOAD ─────────────────────────────────────────────
